@@ -16,7 +16,9 @@ export const ProgressBar: BarType = ({
 
 
     return (<>
-        <label htmlFor={`#ui--${bar_name}`}>{bar_name}</label>
+        <label htmlFor={`#ui--${bar_name}`}>
+            {bar_name}:{` ${current_value}/${max_value}`}
+        </label>
         <progress id={`#ui--${bar_name}`} max={max_value} value={current_value} />
     </>)
 }

@@ -1,7 +1,7 @@
-import { FC, useCallback, useMemo, useState } from "react"
+import { FC, useCallback, useMemo } from "react"
 import { getPlayerStats } from "./stats"
-import { CountDownBar } from "../components/Field/CountDownBar"
-import { ProgressBar } from "../components/Field/ProgressBar"
+import { useCountDownBar } from "../components/Field/CountDownBar"
+import { useStatBar } from "../components/Field/StatBar"
 
 const getEnemy = (_:number) => {
     return {
@@ -13,109 +13,90 @@ const getEnemy = (_:number) => {
 type setupBattleFieldFunction = (phase?: number) => [
     FC<{}>,
     FC<{}>,
-    {}
+    {
+        freezePlayer: (duration: number) => void
+    }
 ]
 
 export const setupBattleField: setupBattleFieldFunction = (phase=0) => {
-    const [is_paused, setIsPause] = useState(false)
     const PlayerStats = getPlayerStats()
-    const [player_health, setPlayerHealth] = useState(PlayerStats.max_health)
-    
     const EnemyStats = getEnemy(phase)
-    const [enemy_health, setEnemyHealth] = useState(EnemyStats.max_health)
 
-    const damagePlayer = useCallback((damage: number) => {
-        const new_health = player_health - damage
-        setPlayerHealth(new_health)
-    }, [player_health])
+    const [AttackBar, {
+        freezeBar: freezeAttack,
+        unfreezeBar,
+        adjustRate,
+        moveProgress
+    }] = useCountDownBar(
+        "Attack", 
+        4000, 
+        () => damageEnemy(PlayerStats.attack_damage),
+        // (timer: number) => console.log("Attack:", timer) 
+    )
+    const [DefenseBar, {
+        freezeBar: freezeDefence
+    }] = useCountDownBar("Defense", 4000, () => damageEnemy(PlayerStats.attack_damage))
+    const [LuckBar, {
+        freezeBar: freezeLuck
+    }] = useCountDownBar("Luck", 4000, () => damageEnemy(PlayerStats.attack_damage))
 
-    const damageEnemy = useCallback((damage: number) => {
-        const new_health = enemy_health - damage
-        setEnemyHealth(new_health)
-    }, [enemy_health])
+    const[PlayerHealthBar, {
+        reduceValue: damagePlayer
+    }] = useStatBar(
+        "Player Health",
+        PlayerStats.max_health,
+        PlayerStats.max_health
+    )
 
-    const togglePause = useCallback(() => {
+    const[EnemyHealthBar, {
+        reduceValue: damageEnemy
+    }] = useStatBar(
+        "Enemy Health",
+        PlayerStats.max_health,
+        PlayerStats.max_health
+    )
+    
+    const [EnemyAttackBar] = useCountDownBar("Attack", 4100, () => damagePlayer(EnemyStats.max_attack))
+    const [EnemyFreezeBar] = useCountDownBar("Freeze", 4000, () => freezePlayer(500))
+    const [EnemyDefenseBar] = useCountDownBar("Defense", 4100, () => damagePlayer(EnemyStats.max_attack))
+    const [EnemyLuckBar] = useCountDownBar("Luck", 4100, () => damagePlayer(EnemyStats.max_attack))
 
-    }, [enemy_health])
 
-    const actions = useMemo(() => ({ 
+    const freezePlayer = (duration: number) => {
+        freezeAttack(duration)
+        freezeDefence(duration)
+        freezeLuck(duration)
+    }
+
+    const PlayerUI = () => {
+        return (
+            <div>
+                <button>Put Up Shield</button>
+                <button onClick={() => unfreezeBar()}>Unfreeze</button>
+                <button onClick={() => adjustRate(2)}>SpeedUp Attack</button>
+                <button onClick={() => moveProgress(2000)}>center Attack</button>
+                <PlayerHealthBar />
+                <AttackBar />
+                <DefenseBar />
+                <LuckBar />
+            </div>
+        )
+    }
+
+    const EnemyUI = () => {
+        return (
+            <div>
+                <EnemyHealthBar />
+                <EnemyAttackBar />
+                <EnemyFreezeBar />
+                <EnemyDefenseBar />
+                <EnemyLuckBar />
+            </div>
+        )
+    }
+
+    const actions = useMemo(() => ({
+        freezePlayer
     }),[])
-
-    const PlayerUI = () => (<div>
-        <ProgressBar 
-            bar_name="Player Health"
-            max_value={PlayerStats.max_health} 
-            current_value={player_health}
-        />
-        <CountDownBar 
-            bar_name="Attack" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damageEnemy(PlayerStats.attack_damage)
-            }}
-            is_frozen={is_paused}
-        />
-        <CountDownBar 
-            bar_name="Defense" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damageEnemy(PlayerStats.attack_damage)
-            }}
-            is_frozen={is_paused}
-        />
-        <CountDownBar 
-            bar_name="Persistence" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damageEnemy(PlayerStats.attack_damage)
-            }}
-            is_frozen={is_paused}
-        />
-        <button>Put Up Shield</button>
-        <button onClick={() => {
-            setIsPause(!is_paused)
-        }}>Pause</button>
-    </div>)
-
-    const EnemyUI = () => (<div>
-        <ProgressBar 
-            bar_name="Enemy Health"
-            max_value={EnemyStats.max_health} 
-            current_value={enemy_health}
-        />
-        <CountDownBar 
-            bar_name="Attack" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damagePlayer(EnemyStats.max_attack)
-            }}
-            is_frozen={is_paused}
-        />
-        <CountDownBar 
-            bar_name="Freeze Attack" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damagePlayer(EnemyStats.max_attack)
-            }}
-            is_frozen={is_paused}
-        />
-        <CountDownBar 
-            bar_name="Defense" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damagePlayer(EnemyStats.max_attack)
-            }}
-            is_frozen={is_paused}
-        />
-        <CountDownBar 
-            bar_name="Persistence" 
-            duration={4 * 1000}
-            onFinish={() => {
-                damagePlayer(EnemyStats.max_attack)
-            }}
-            is_frozen={is_paused}
-        />
-
-    </div>)
-    return [EnemyUI, PlayerUI, actions]
+    return [useCallback(EnemyUI,[]), useCallback(PlayerUI, []), actions]
 }

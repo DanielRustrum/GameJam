@@ -4,7 +4,7 @@ import { setupBattleField } from '../services/battle';
 type StagePage = FC<{}>
 
 export const Field: StagePage = () => {
-    const [EnemyUI, PlayerUI] = setupBattleField()
+    const [EnemyUI, PlayerUI, { freezePlayer }] = setupBattleField()
 
     return (
         <>
@@ -19,7 +19,7 @@ export const Field: StagePage = () => {
                 <div>
                     <p>Dev Actions:</p>
                     <button>Start Game</button>
-                    <button>Pause Game</button>
+                    <button onClick={() => freezePlayer(1000)}>FreezePlayer</button>
                     <button>Resume Game</button>
                     <div id="game--log">
                         <p>Log Starts Here</p>
