@@ -4,14 +4,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.scss'
 
 import { Menu } from './pages/Menu'
-import { Stage } from './pages/Stage'
+import { Field } from './pages/Field'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Menu />} />
-        <Route path="/play" element={<Stage />} />
+        <Route path="/play" element={<Field />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

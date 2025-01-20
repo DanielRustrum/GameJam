@@ -8,7 +8,7 @@ import placeholder_music from '../assets/sounds/placeholder_music.mp3'
 type MenuPage = FC<{}>
 
 export const Menu: MenuPage = () => {
-    const [initiate_music, toggle_music] = useBackgroundMusic(placeholder_music)
+    const [initiate_music, toggle_music] = useBackgroundMusic(placeholder_music, .25)
 
     return (
         <div onClick={initiate_music} style={{width: "100vw", height: "100vh"}}>
