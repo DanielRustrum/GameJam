@@ -16,6 +16,7 @@ export const useShieldButton = (
         disableButton,
         enableButton
     }] = useToggleButton("Shield", () => {
+        disableButton()
         startActiveTimer()
     })
 
@@ -23,7 +24,6 @@ export const useShieldButton = (
         if(active_time_remaining == 0 && getToggleState()) {
             forceToggle(false)
             startDisabledTimer()
-            disableButton()
         }
     }, [active_time_remaining])
 

@@ -33,9 +33,5 @@ export const useFocusButton = (
         })
     }
 
-    const Display = () => {
-        return <p>{FocusRef.current.current_focus}</p>
-    }
-
     return [FocusRef.current.current_focus, Buttons]
 }

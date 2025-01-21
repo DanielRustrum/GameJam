@@ -6,7 +6,8 @@ type StatBarComponent = FC<{}>
 type useStatBarHook = (
     bar_name: string,
     start_value: number,
-    max_value: number
+    max_value: number,
+    onUpdate?: (stat: number) => void
 ) => [
     StatBarComponent,
     {
@@ -18,7 +19,8 @@ type useStatBarHook = (
 export const useStatBar: useStatBarHook = (
     bar_name,
     start_value,
-    max_value
+    max_value,
+    onUpdate = () => {}
 ) => {
     const BarRef = useRef<{
         setStat?: (set: (new_stat: number) => number) => void
@@ -29,14 +31,22 @@ export const useStatBar: useStatBarHook = (
     const reduceValue = (amount: number) => {
         if(BarRef.current.setStat)
             BarRef.current.setStat(
-                (current_stat: number) => current_stat - amount
+                (current_stat: number) =>{ 
+                    const updated_stat = current_stat - amount
+                    onUpdate(updated_stat)
+                    return updated_stat
+                }
             );
     } 
 
     const increaseValue = (amount: number) => {
         if(BarRef.current.setStat)
             BarRef.current.setStat(
-                (current_stat: number) => current_stat + amount
+                (current_stat: number) =>{ 
+                    const updated_stat = current_stat + amount
+                    onUpdate(updated_stat)
+                    return updated_stat
+                }
             );
     } 
 

@@ -1,4 +1,4 @@
-import { FC, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useInterval } from "../../hooks/useInterval"
 import { ProgressBar } from "./ProgressBar"
 import { useTimer } from "../../hooks/useTimer"
@@ -17,6 +17,7 @@ type useCountDownBarHook = (
         unfreezeBar: () => void
         adjustRate: (new_rate: number) => void
         moveProgress: (new_rate: number) => void
+        startCountdown: () => void
     }
 ]
 
@@ -32,6 +33,7 @@ export const useCountDownBar: useCountDownBarHook = (
         unfreezeBar?: () => void
         adjustRate?: (new_rate: number) => void
         moveProgress?: (new_rate: number) => void
+        startCountdown?: () => void
     }>()
 
     const freezeBar = (duration: number) => {
@@ -55,6 +57,12 @@ export const useCountDownBar: useCountDownBarHook = (
     const moveProgress = (new_rate: number) => {
         if(BarRef.current?.moveProgress){
             BarRef.current?.moveProgress(new_rate)
+        }
+    }
+
+    const startCountdown = () => {
+        if(BarRef.current?.startCountdown){
+            BarRef.current.startCountdown()
         }
     }
 
@@ -94,7 +102,11 @@ export const useCountDownBar: useCountDownBarHook = (
             adjustRate: adjust,
             moveProgress:(set_time_remaining: number) => {
                 move(set_time_remaining * rate)
-            } 
+            },
+            startCountdown: () => {
+                // move(1)
+                start()
+            }
         }))
 
         useEffect(()=>{
@@ -110,11 +122,6 @@ export const useCountDownBar: useCountDownBarHook = (
 
         onUpdate(time_remaining)
             
-        useEffect(() => {
-            start()
-        }, [])
-
-
         return <ProgressBar 
             bar_name={bar_name}
             max_value={timer_duration * 1/rate} 
@@ -123,7 +130,7 @@ export const useCountDownBar: useCountDownBarHook = (
     }
 
     const actions = useMemo(
-        () => ({ freezeBar, unfreezeBar, adjustRate, moveProgress }),
+        () => ({ freezeBar, unfreezeBar, adjustRate, moveProgress, startCountdown: useCallback(startCountdown, []) }),
         [],
     );
 
