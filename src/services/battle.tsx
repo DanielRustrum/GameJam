@@ -1,7 +1,9 @@
-import { FC, useCallback, useMemo } from "react"
+import { FC, useCallback, useMemo, useEffect } from "react"
 import { getPlayerStats } from "./stats"
 import { useCountDownBar } from "../components/Field/CountDownBar"
 import { useStatBar } from "../components/Field/StatBar"
+import { useShieldButton } from "../components/Field/ShieldButton"
+import { useFocusButton } from "../components/Field/FocusButton"
 
 const getEnemy = (_:number) => {
     return {
@@ -24,21 +26,61 @@ export const setupBattleField: setupBattleFieldFunction = (phase=0) => {
 
     const [AttackBar, {
         freezeBar: freezeAttack,
-        unfreezeBar,
-        adjustRate,
-        moveProgress
+        adjustRate: adjustAttack,
     }] = useCountDownBar(
         "Attack", 
         4000, 
         () => damageEnemy(PlayerStats.attack_damage),
-        // (timer: number) => console.log("Attack:", timer) 
     )
     const [DefenseBar, {
-        freezeBar: freezeDefence
+        freezeBar: freezeDefence,
+        adjustRate: adjustDefense,
+
     }] = useCountDownBar("Defense", 4000, () => damageEnemy(PlayerStats.attack_damage))
     const [LuckBar, {
-        freezeBar: freezeLuck
+        freezeBar: freezeLuck,
+        adjustRate: adjustLuck,
     }] = useCountDownBar("Luck", 4000, () => damageEnemy(PlayerStats.attack_damage))
+    
+    const [
+        _,
+        [
+            AttackFocusButton,
+            DefenseFocusButton,
+            LuckFocusButton
+        ]
+    ] = useFocusButton([
+        "Attack",
+        "Defense",
+        "Luck",
+    ], "Attack",
+    (stat) => {
+        console.log(stat)
+        switch(stat) {
+            case "Attack":
+                adjustAttack(2)
+                adjustDefense(1)
+                adjustLuck(1)
+                break
+            case "Defense":
+                adjustAttack(1)
+                adjustDefense(2)
+                adjustLuck(1)
+                break
+            case "Luck":
+                adjustAttack(1)
+                adjustDefense(1)
+                adjustLuck(2)
+                break
+            default:
+                adjustAttack(1)
+                adjustDefense(1)
+                adjustLuck(1)
+                break
+        }
+    })
+
+    const [ShieldButton, { getToggleState }] = useShieldButton(1000, 2000)
 
     const[PlayerHealthBar, {
         reduceValue: damagePlayer
@@ -61,24 +103,25 @@ export const setupBattleField: setupBattleFieldFunction = (phase=0) => {
     const [EnemyDefenseBar] = useCountDownBar("Defense", 4100, () => damagePlayer(EnemyStats.max_attack))
     const [EnemyLuckBar] = useCountDownBar("Luck", 4100, () => damagePlayer(EnemyStats.max_attack))
 
-
     const freezePlayer = (duration: number) => {
-        freezeAttack(duration)
-        freezeDefence(duration)
-        freezeLuck(duration)
+        if(!getToggleState()) {
+            freezeAttack(duration)
+            freezeDefence(duration)
+            freezeLuck(duration)
+        }
     }
 
     const PlayerUI = () => {
         return (
             <div>
-                <button>Put Up Shield</button>
-                <button onClick={() => unfreezeBar()}>Unfreeze</button>
-                <button onClick={() => adjustRate(2)}>SpeedUp Attack</button>
-                <button onClick={() => moveProgress(2000)}>center Attack</button>
+                <ShieldButton />
                 <PlayerHealthBar />
                 <AttackBar />
+                <AttackFocusButton/>
                 <DefenseBar />
+                <DefenseFocusButton />
                 <LuckBar />
+                <LuckFocusButton />
             </div>
         )
     }
