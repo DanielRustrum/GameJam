@@ -104,7 +104,6 @@ export const useCountDownBar: useCountDownBarHook = (
                 move(set_time_remaining * rate)
             },
             startCountdown: () => {
-                // move(1)
                 start()
             }
         }))

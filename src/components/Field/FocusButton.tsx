@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from "react"
+import { FC, useCallback, useRef } from "react"
 
 export const useFocusButton = (
     stats: Array<string>,
@@ -6,7 +6,8 @@ export const useFocusButton = (
     onActive = (_:string | null) => {}
 ): [
     string | null,
-    Array<FC<{}>>
+    Array<FC<{}>>,
+    () => void
 ] => {
     const Buttons: Array<FC<{}>> = []
     const FocusRef = useRef<{
@@ -15,9 +16,10 @@ export const useFocusButton = (
         current_focus: default_focus
     })
 
-    useEffect(() => {
+    const forceActivation = useCallback(() => {
         onActive(FocusRef.current.current_focus)
     }, [])
+
 
     for (const stat of stats) {
         Buttons.push(({}) => {
@@ -33,5 +35,5 @@ export const useFocusButton = (
         })
     }
 
-    return [FocusRef.current.current_focus, Buttons]
+    return [FocusRef.current.current_focus, Buttons, forceActivation]
 }

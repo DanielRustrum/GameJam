@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useRef } from "react"
+import { FC, memo, useCallback, useMemo, useRef } from "react"
 import { getPlayerStats } from "./stats"
 import { useCountDownBar } from "../components/Field/CountDownBar"
 import { useStatBar } from "../components/Field/StatBar"
@@ -44,6 +44,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     //* Player Stat Bars
     const [AttackBar, {
         freezeBar: freezeAttack,
+        unfreezeBar: unfreezeAttack,
         adjustRate: adjustAttack,
         startCountdown: startPlayerAttack
     }] = useCountDownBar("Attack", 4000, () => {
@@ -61,6 +62,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     })
     const [DefenseBar, {
         freezeBar: freezeDefence,
+        unfreezeBar: unfreezeDefense,
         adjustRate: adjustDefense,
         startCountdown: startPlayerDefense
     }] = useCountDownBar("Defense", 1000, () => {
@@ -73,6 +75,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     })
     const [LuckBar, {
         freezeBar: freezeLuck,
+        unfreezeBar: unfreezeLuck,
         adjustRate: adjustLuck,
         startCountdown: startPlayerLuck
     }] = useCountDownBar("Luck", 4000, () => {
@@ -85,7 +88,8 @@ export const setupBattleField: setupBattleFieldFunction = (
             AttackFocusButton,
             DefenseFocusButton,
             LuckFocusButton
-        ]
+        ],
+        forceActivation
     ] = useFocusButton([
         "Attack",
         "Defense",
@@ -125,7 +129,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         PlayerStats.max_health,
         PlayerStats.max_health,
         (current_health) => {
-            if(current_health <= 0) {
+            if(current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
                 onBattleEnd("Opponent")
@@ -138,6 +142,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     
     const [EnemyAttackBar, {
         freezeBar:freezeEnemyAttack,
+        unfreezeBar: unfreezeEnemyAttack,
         startCountdown: startEnemyAttack
     }] = useCountDownBar("Attack", 4100, () => {
         const damage_calc = EnemyStats.max_attack - battlefieldDataRef.current.player_defense_stack
@@ -147,6 +152,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     })
     const [EnemyFreezeBar, {
         freezeBar:freezeEnemyFreeze,
+        unfreezeBar: unfreezeEnemyFreeze,
         startCountdown: startEnemyFreeze
     }] = useCountDownBar("Freeze", 4000, () => {
             if(!getToggleState())
@@ -154,12 +160,14 @@ export const setupBattleField: setupBattleFieldFunction = (
         })
     const [EnemyDefenseBar, {
         freezeBar:freezeEnemyDefense,
+        unfreezeBar: unfreezeEnemyDefense,
         startCountdown: startEnemyDefense
     }] = useCountDownBar("Defense", 4100, () => () => {
         battlefieldDataRef.current.enemy_defense_stack += 50
     })
     const [EnemyLuckBar, {
         freezeBar:freezeEnemyLuck,
+        unfreezeBar: unfreezeEnemyLuck,
         startCountdown: startEnemyLuck
     }] = useCountDownBar("Luck", 4100, () => {
         battlefieldDataRef.current.enemy_luck_stack += 1
@@ -172,7 +180,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         PlayerStats.max_health,
         PlayerStats.max_health,
         (current_health) => {
-            if(current_health <= 0) {
+            if(current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
                 onBattleEnd("Player")
@@ -203,13 +211,22 @@ export const setupBattleField: setupBattleFieldFunction = (
         startEnemyFreeze()
         startEnemyDefense()
         startEnemyLuck()
+        forceActivation()
     }
 
     const pauseBattle = () => {
         freezePlayer(Infinity)
         freezeEnemy(Infinity)
     }
-    const resumeBattle = () => {}
+    const resumeBattle = () => {
+        unfreezeAttack()
+        unfreezeDefense()
+        unfreezeLuck()
+        unfreezeEnemyAttack()
+        unfreezeEnemyFreeze()
+        unfreezeEnemyDefense()
+        unfreezeEnemyLuck()
+    }
 
     // * Battle Field UI
     const PlayerUI = () => {
@@ -218,7 +235,7 @@ export const setupBattleField: setupBattleFieldFunction = (
                 <ShieldButton />
                 <PlayerHealthBar />
                 <AttackBar />
-                <AttackFocusButton/>
+                <AttackFocusButton />
                 <DefenseBar />
                 <DefenseFocusButton />
                 <LuckBar />
@@ -247,5 +264,5 @@ export const setupBattleField: setupBattleFieldFunction = (
         pauseBattle,
         resumeBattle
     }),[])
-    return [useCallback(EnemyUI,[]), useCallback(PlayerUI, []), actions]
+    return [useCallback(EnemyUI,[]), memo(PlayerUI), actions]
 }

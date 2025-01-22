@@ -24,9 +24,7 @@ export const useStatBar: useStatBarHook = (
 ) => {
     const BarRef = useRef<{
         setStat?: (set: (new_stat: number) => number) => void
-    }>({
-        
-    })
+    }>({})
     
     const reduceValue = (amount: number) => {
         if(BarRef.current.setStat)
