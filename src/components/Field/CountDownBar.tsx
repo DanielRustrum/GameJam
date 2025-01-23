@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useInterval } from "../../hooks/useInterval"
 import { ProgressBar } from "./ProgressBar"
 import { useTimer } from "../../hooks/useTimer"
@@ -27,7 +27,6 @@ export const useCountDownBar: useCountDownBarHook = (
     onFinish,
     onUpdate = () => {}
 ) => {
-    
     const BarRef = useRef<{
         freezeBar?: (duration?: number) => void,
         unfreezeBar?: () => void
@@ -82,7 +81,6 @@ export const useCountDownBar: useCountDownBarHook = (
         const [freeze_timer, {start: startFreezeTimer}] = useTimer(0, 100)
         const [freeze_timer_active, setFreezeTimerActive] = useState(false)
 
-
         useImperativeHandle(BarRef, () => ({
             freezeBar: (duration = Infinity) => {
                 if(duration !== Infinity) {
@@ -97,6 +95,7 @@ export const useCountDownBar: useCountDownBarHook = (
                 if(is_frozen){
                     resume()
                     setFreezeTimerActive(false)
+                    setIsFrozen(false)
                 }
             },
             adjustRate: adjust,
@@ -115,21 +114,47 @@ export const useCountDownBar: useCountDownBarHook = (
                 } else{
                     resume()
                 }
+
+                setIsFrozen(false)
                 setFreezeTimerActive(false)
             }
         }, [freeze_timer])
 
         onUpdate(time_remaining)
             
+        const max_value = timer_duration * 1/rate
+        const current_value = (timer_duration - time_remaining) * 1/rate
+
+        const bar_text = is_frozen? 
+            `Frozen! ${freeze_timer !== 0? freeze_timer: ""}`: 
+            `${bar_name}: ${current_value}/${max_value}`
+
+        const bar_color = is_frozen? 
+            "lightblue": 
+                rate > 1? 
+                "grey": 
+                    rate < 1?
+                    "crimson":
+                    "blue"
+
+
         return <ProgressBar 
-            bar_name={bar_name}
-            max_value={timer_duration * 1/rate} 
-            current_value={(timer_duration - time_remaining) * 1/rate}
+            bar_text={bar_text}
+            max_value={max_value} 
+            current_value={current_value}
+            backgroundColor={bar_color}
+            barColor={is_frozen? "lightblue": "#c9c9c9"}
         />
     }
 
     const actions = useMemo(
-        () => ({ freezeBar, unfreezeBar, adjustRate, moveProgress, startCountdown: useCallback(startCountdown, []) }),
+        () => ({ 
+            freezeBar, 
+            unfreezeBar, 
+            adjustRate, 
+            moveProgress, 
+            startCountdown 
+        }),
         [],
     );
 

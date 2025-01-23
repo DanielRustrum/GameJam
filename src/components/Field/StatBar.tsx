@@ -1,4 +1,4 @@
-import { FC, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, memo, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { ProgressBar } from "./ProgressBar"
 
 type StatBarComponent = FC<{}>
@@ -56,8 +56,9 @@ export const useStatBar: useStatBarHook = (
             setStat
         }))
         
-        return <ProgressBar 
-            bar_name={bar_name}
+        return <ProgressBar
+            backgroundColor="red"
+            bar_text={bar_name}
             current_value={stat}
             max_value={max_value}
         />
@@ -68,5 +69,5 @@ export const useStatBar: useStatBarHook = (
         [],
     );
 
-    return [StatBar, actions]
+    return [memo(StatBar), actions]
 }

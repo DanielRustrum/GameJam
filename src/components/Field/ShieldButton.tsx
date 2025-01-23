@@ -1,37 +1,57 @@
-import { FC, useEffect } from "react"
-import { useToggleButton } from "./ToggleButton"
+import { FC, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useTimer } from "../../hooks/useTimer"
 
 export const useShieldButton = (
     active_duration: number = 1000,
     charge_duration: number = 1000
-): [FC<{}>, {getToggleState: () => boolean}] => {
+): [FC<{}>, {getIsActive: () => boolean}] => {
+    const ShieldRef = useRef<{is_active?: boolean}>()
 
-    const [ active_time_remaining, {start: startActiveTimer} ] = useTimer(active_duration, 100)
-    const [ disabled_time_remaining, {start: startDisabledTimer} ] = useTimer(charge_duration, 100)
+    const getIsActive = () => {
+        if(ShieldRef.current?.is_active){
+            return ShieldRef.current?.is_active;
+        }
+        return false
+    }
+
+    const SheldButtonWrapper = () => {
+
+        const [ active_time_remaining, {start: startActiveTimer} ] = useTimer(active_duration, 100)
+        const [ disabled_time_remaining, {start: startDisabledTimer} ] = useTimer(charge_duration, 100)
+        const [is_disabled, setIsDisabled] = useState(false)
+        const [is_active, setIsActive] = useState(false)
+
+
+        useImperativeHandle(ShieldRef, () => ({
+            is_active 
+        }))
+
+        useEffect(()=>{
+            if(active_time_remaining == 0 && is_active) {
+                startDisabledTimer()
+                setIsActive(false)
+            }
+        }, [active_time_remaining])
     
-    const [ShieldButton, {
-        getToggleState, 
-        forceToggle,
-        disableButton,
-        enableButton
-    }] = useToggleButton("Shield", () => {
-        disableButton()
-        startActiveTimer()
-    })
+        useEffect(()=>{
+            if(disabled_time_remaining == 0 && !is_active) {
+                setIsDisabled(false)
+            }
+        }, [disabled_time_remaining])
 
-    useEffect(()=>{
-        if(active_time_remaining == 0 && getToggleState()) {
-            forceToggle(false)
-            startDisabledTimer()
-        }
-    }, [active_time_remaining])
+        return <button 
+            disabled={is_disabled}
+            onClick={() => {
+                setIsDisabled(true)
+                setIsActive(true)
+                startActiveTimer()
+            }}
+        >Shield</button>
+    }
 
-    useEffect(()=>{
-        if(disabled_time_remaining == 0 && !getToggleState()) {
-            enableButton()
-        }
-    }, [disabled_time_remaining])
+    const actions = useMemo(() => (
+        {getIsActive}
+    ),[])
 
-    return [ShieldButton, { getToggleState }]
+    return [SheldButtonWrapper, actions]
 }

@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, useMemo, useRef } from "react"
+import { FC, memo, useMemo, useRef } from "react"
 import { getPlayerStats } from "./stats"
 import { useCountDownBar } from "../components/Field/CountDownBar"
 import { useStatBar } from "../components/Field/StatBar"
@@ -39,6 +39,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         enemy_defense_stack: 0,
         player_luck_stack: 0,
         enemy_luck_stack: 0,
+        has_ended: false
     })
 
     //* Player Stat Bars
@@ -120,7 +121,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         }
     })
 
-    const [ShieldButton, { getToggleState }] = useShieldButton(1000, 2000)
+    const [ShieldButton, { getIsActive }] = useShieldButton(1000, 2000)
 
     const[PlayerHealthBar, {
         reduceValue: damagePlayer
@@ -132,7 +133,11 @@ export const setupBattleField: setupBattleFieldFunction = (
             if(current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
-                onBattleEnd("Opponent")
+                if(!battlefieldDataRef.current.has_ended){
+                    onBattleEnd("Opponent")
+                    battlefieldDataRef.current.has_ended = true
+                }
+
             }
         }
     )
@@ -155,7 +160,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeEnemyFreeze,
         startCountdown: startEnemyFreeze
     }] = useCountDownBar("Freeze", 4000, () => {
-            if(!getToggleState())
+            if(!getIsActive())
                 freezePlayer(500);
         })
     const [EnemyDefenseBar, {
@@ -183,7 +188,10 @@ export const setupBattleField: setupBattleFieldFunction = (
             if(current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
-                onBattleEnd("Player")
+                if(!battlefieldDataRef.current.has_ended) {
+                    onBattleEnd("Player")
+                    battlefieldDataRef.current.has_ended = true
+                }
             }
         }
     )
@@ -264,5 +272,5 @@ export const setupBattleField: setupBattleFieldFunction = (
         pauseBattle,
         resumeBattle
     }),[])
-    return [useCallback(EnemyUI,[]), memo(PlayerUI), actions]
+    return [memo(EnemyUI), memo(PlayerUI), actions]
 }

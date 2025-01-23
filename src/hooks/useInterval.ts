@@ -32,7 +32,7 @@ export const useInterval:useIntervalHook = (
         {
             start: startTimer, 
             reset, 
-            pause, 
+            pause: pauseTimer, 
             resume, 
             move
         }
@@ -45,6 +45,11 @@ export const useInterval:useIntervalHook = (
         startTimer(new_duration?? duration * current_rate)
     }, [])
 
+    const pause = () => {
+        console.log(timeLeft)
+        pauseTimer()
+    }
+
     const adjust = (new_rate: number) => {
         const rate = 1 / new_rate
         setCurrentRate(rate)
@@ -54,7 +59,7 @@ export const useInterval:useIntervalHook = (
     }
 
     useEffect(()=>{
-        if(timeLeft == 0 && is_active) {
+        if(timeLeft === 0 && is_active) {
             triggerCallback()
             startTimer(duration * current_rate)
         }

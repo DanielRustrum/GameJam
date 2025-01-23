@@ -9,7 +9,9 @@ export const Field: StagePage = () => {
         startBattle,
         pauseBattle,
         resumeBattle
-     }] = setupBattleField()
+     }] = setupBattleField(0, (victor: string) => {
+        console.log(victor)
+     })
 
     return (
         <>
