@@ -1,14 +1,15 @@
 import { FC, memo, useMemo, useRef } from "react"
-import { getPlayerStats } from "./stats"
+import { PlayerBucketData } from "./stats"
 import { useCountDownBar } from "../components/Field/CountDownBar"
 import { useStatBar } from "../components/Field/StatBar"
 import { useShieldButton } from "../components/Field/ShieldButton"
 import { useFocusButton } from "../components/Field/FocusButton"
-import { getEnemy } from "./enemy"
+import { EnemyBucketData } from "./enemy"
 
 
 type setupBattleFieldFunction = (
-    phase?: number,
+    PlayerStats: PlayerBucketData,
+    EnemyStats: EnemyBucketData,
     onBattleEnd?: (victor: "Player" | "Opponent") => void
 ) => [
     FC<{}>,
@@ -28,11 +29,10 @@ const isCrit = (stat: number) => {
 }
 
 export const setupBattleField: setupBattleFieldFunction = (
-    phase=0, 
+    PlayerStats,
+    EnemyStats, 
     onBattleEnd=()=>{}
 ) => {
-    const PlayerStats = getPlayerStats()
-    const EnemyStats = getEnemy(phase)
 
     const battlefieldDataRef = useRef({
         player_defense_stack: 0,
@@ -150,7 +150,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeEnemyAttack,
         startCountdown: startEnemyAttack
     }] = useCountDownBar("Attack", 4100, () => {
-        const damage_calc = EnemyStats.max_attack - battlefieldDataRef.current.player_defense_stack
+        const damage_calc = EnemyStats.attack_damage - battlefieldDataRef.current.player_defense_stack
         const actual_damage = damage_calc < 0? 0: damage_calc
         damagePlayer(actual_damage)
         battlefieldDataRef.current.player_defense_stack = 0

@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react"
 
+type useLocalStorageBucket = <BucketType = unknown>(
+    bucket_name: string
+) => [
+    BucketType | undefined,
+    (set: BucketType | ((set: BucketType) => BucketType) ) => void
+]
 
-export const useLocalStorageBucket = (bucket_name: string) => {
-    const [bucket_data, setBucket] = useState<unknown>(
-        localStorage.get(bucket_name)
-    )
+export const useLocalStorageBucket:useLocalStorageBucket = 
+    ( 
+        bucket_name
+    ) => {
+    const [bucket_data, setBucket] = useState(() => {
+        const local_store = localStorage.getItem(bucket_name)
+        
+         if(local_store === null) 
+            return undefined;
+        
+        return JSON.parse(local_store)
+    })
 
     useEffect(() => {
         localStorage.setItem(bucket_name, JSON.stringify(bucket_data))
@@ -12,7 +26,9 @@ export const useLocalStorageBucket = (bucket_name: string) => {
 
     return [
         bucket_data,
-        setBucket
+        (set: any) => {
+            setBucket(set)
+        }
     ]
 }
 

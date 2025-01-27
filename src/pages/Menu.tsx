@@ -1,21 +1,26 @@
 import {FC} from 'react'
 
-import { useBackgroundMusic } from '../hooks/useBackgroundMusic'
+// import { useBackgroundMusic } from '../hooks/useBackgroundMusic'
 
 
-import placeholder_music from '../assets/sounds/placeholder_music.mp3'
+// import placeholder_music from '../assets/sounds/placeholder_music.mp3'
+import { useNavigate } from 'react-router-dom'
+import { useInitPlayerStats } from '../services/stats'
 
 type MenuPage = FC<{}>
 
 export const Menu: MenuPage = () => {
-    const [initiate_music, toggle_music] = useBackgroundMusic(placeholder_music, .25)
+    // const [initiate_music, toggle_music] = useBackgroundMusic(placeholder_music, .25)
+    const navigate = useNavigate()
+    const initPlayer = useInitPlayerStats()
 
     return (
-        <div onClick={initiate_music} style={{width: "100vw", height: "100vh"}}>
+        <div style={{width: "100vw", height: "100vh"}}>
             <h1>Game Name</h1>
-            <button>Start</button>
-            <button>Settings</button>
-            <button onClick={toggle_music}>Mute Music</button>
+            <button onClick={() => {
+              initPlayer()
+              navigate("/upgrade")  
+            }}>Start</button>
         </div>
     )
 }

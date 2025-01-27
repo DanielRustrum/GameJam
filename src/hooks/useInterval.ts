@@ -46,7 +46,6 @@ export const useInterval:useIntervalHook = (
     }, [])
 
     const pause = () => {
-        console.log(timeLeft)
         pauseTimer()
     }
 
