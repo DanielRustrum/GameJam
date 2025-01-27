@@ -14,12 +14,12 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Menu />} />
-        <Route path="/field" element={<Field />} />
-        <Route path="/upgrade" element={<Stronghold />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/end-game" element={<End />} />
-        <Route path="/town" element={<Town />} />
+        <Route path="/GameJam" element={<Menu />} />
+        <Route path="/GameJam/field" element={<Field />} />
+        <Route path="/GameJam/upgrade" element={<Stronghold />} />
+        <Route path="/GameJam/explore" element={<Explore />} />
+        <Route path="/GameJam/end-game" element={<End />} />
+        <Route path="/GameJam/town" element={<Town />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
