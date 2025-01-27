@@ -5,6 +5,8 @@ export interface EnemyBucketData {
     max_health: number
     attack_damage: number
     attack_cooldown: number
+    freeze_duration: number
+    freeze_cooldown: number
     defense_base: number
     defense_build: number
     defense_cooldown: number
@@ -38,10 +40,12 @@ export const generateEnemy = ():((is_large: boolean) => EnemyBucketData) => {
             max_health: (200 * (phase * 2) + (50 * round)) * size_mult, 
             attack_damage: (10 * ((phase-1) * 2) + (5 * round)) * size_mult,
             attack_cooldown: 6000 / phase - (100 * round),
-            defense_base: (200 * (phase * 2) + (50 * round)) * size_mult,
+            freeze_duration: (200 * phase  + (50 * round)) * size_mult,
+            freeze_cooldown: 10000 / phase - (100 * round),
+            defense_base: (3 * (phase-1 * 2) + (5 * round-1)) * size_mult,
             defense_build: 1 * (phase * 2) + (5 * round),
             defense_cooldown: 6000 / phase - (100 * round),
-            luck_base: 200 * (phase * 2) + (50 * round),
+            luck_base: 1 * (phase * 2) + (5 * round),
             luck_build: 1 * (phase * 2) + (5 * round),
             luck_cooldown: 6000 / phase - (100 * round),
             reward_points: (1 * phase  + (1 * round)) * size_mult,
@@ -49,7 +53,6 @@ export const generateEnemy = ():((is_large: boolean) => EnemyBucketData) => {
         }
 
         setEnemyBucket(enemy)
-
         return enemy
     }
 }

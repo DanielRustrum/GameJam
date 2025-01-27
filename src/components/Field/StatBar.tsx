@@ -31,7 +31,7 @@ export const useStatBar: useStatBarHook = (
             BarRef.current.setStat(
                 (current_stat: number) =>{ 
                     const updated_stat = current_stat - amount
-                    onUpdate(updated_stat)
+                    onUpdate(current_stat)
                     return updated_stat
                 }
             );
@@ -42,7 +42,7 @@ export const useStatBar: useStatBarHook = (
             BarRef.current.setStat(
                 (current_stat: number) =>{ 
                     const updated_stat = current_stat + amount
-                    onUpdate(updated_stat)
+                    onUpdate(current_stat)
                     return updated_stat
                 }
             );

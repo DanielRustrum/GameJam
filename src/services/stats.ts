@@ -39,13 +39,13 @@ export const useInitPlayerStats = () => {
         max_health: 200,
         max_health_step: 0,
         current_health: 200,
-        attack_damage: 20,
+        attack_damage: 50,
         attack_damage_step: 0,
         attack_cooldown: 10000,
         attack_cooldown_step: 0,
-        defense_base: 5,
+        defense_base: 0,
         defense_base_step: 0,
-        defense_build: 5,
+        defense_build: 1,
         defense_build_step: 0,
         defense_cooldown: 10000,
         defense_cooldown_step: 0,
@@ -210,7 +210,7 @@ export const usePlayerRounds = () => {
         return { ...set, [stat]: value }
     })
 
-    return (meat: number, points: number) => {
+    return (meat: number, points: number, current_health: number) => {
         const current_phase =
            player_data.phase < max_phase && player_data.round === max_rounds ?
                 player_data.phase + 1 :
@@ -221,6 +221,7 @@ export const usePlayerRounds = () => {
                 0
         setStat("phase", current_phase)
         setStat("round", current_round)
+        setStat("current_health", current_health)
         setStat("meat_count", player_data.meat_count + meat)
         setStat("upgrade_points", player_data.upgrade_points + points)
     }

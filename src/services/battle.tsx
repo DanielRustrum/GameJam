@@ -10,7 +10,7 @@ import { EnemyBucketData } from "./enemy"
 type setupBattleFieldFunction = (
     PlayerStats: PlayerBucketData,
     EnemyStats: EnemyBucketData,
-    onBattleEnd?: (victor: "Player" | "Opponent") => void
+    onBattleEnd?: (victor: "Player" | "Opponent", health: number) => void
 ) => [
     FC<{}>,
     FC<{}>,
@@ -35,12 +35,15 @@ export const setupBattleField: setupBattleFieldFunction = (
 ) => {
 
     const battlefieldDataRef = useRef({
-        player_defense_stack: 0,
-        enemy_defense_stack: 0,
-        player_luck_stack: 0,
-        enemy_luck_stack: 0,
+        player_defense_stack: PlayerStats.defense_base,
+        enemy_defense_stack: EnemyStats.defense_base,
+        player_luck_stack: PlayerStats.luck_base,
+        enemy_luck_stack: EnemyStats.luck_base,
+        player_current_health: PlayerStats.current_health,
         has_ended: false
     })
+
+    console.log(battlefieldDataRef.current)
 
     //* Player Stat Bars
     const [AttackBar, {
@@ -48,17 +51,19 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeAttack,
         adjustRate: adjustAttack,
         startCountdown: startPlayerAttack
-    }] = useCountDownBar("Attack", 4000, () => {
+    }] = useCountDownBar("Attack", PlayerStats.attack_cooldown, () => {
         const damage_calc = PlayerStats.attack_damage - battlefieldDataRef.current.enemy_defense_stack
         const actual_damage = damage_calc < 0? 0: damage_calc
+
+        console.log(actual_damage, battlefieldDataRef.current)
 
         const critted = isCrit(battlefieldDataRef.current.player_luck_stack)
         const mult = critted? 1.2: 1
         damageEnemy(actual_damage * mult)
-        battlefieldDataRef.current.enemy_defense_stack = 0
+        battlefieldDataRef.current.enemy_defense_stack = EnemyStats.defense_base
         
         if(critted)
-            battlefieldDataRef.current.player_luck_stack = 0;
+            battlefieldDataRef.current.player_luck_stack = PlayerStats.luck_base;
 
     })
     const [DefenseBar, {
@@ -66,21 +71,21 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeDefense,
         adjustRate: adjustDefense,
         startCountdown: startPlayerDefense
-    }] = useCountDownBar("Defense", 1000, () => {
+    }] = useCountDownBar("Defense", PlayerStats.defense_cooldown, () => {
         const critted = isCrit(battlefieldDataRef.current.player_luck_stack)
         const mult = critted? 1.2: 1
 
-        battlefieldDataRef.current.player_defense_stack += 5 * mult
+        battlefieldDataRef.current.player_defense_stack += PlayerStats.defense_build * mult
         if(critted)
-            battlefieldDataRef.current.player_luck_stack = 0;
+            battlefieldDataRef.current.player_luck_stack = PlayerStats.luck_base;
     })
     const [LuckBar, {
         freezeBar: freezeLuck,
         unfreezeBar: unfreezeLuck,
         adjustRate: adjustLuck,
         startCountdown: startPlayerLuck
-    }] = useCountDownBar("Luck", 4000, () => {
-        battlefieldDataRef.current.player_luck_stack += 1
+    }] = useCountDownBar("Luck", PlayerStats.luck_cooldown, () => {
+        battlefieldDataRef.current.player_luck_stack += PlayerStats.luck_build
     })
     
     const [
@@ -99,19 +104,19 @@ export const setupBattleField: setupBattleFieldFunction = (
     (stat) => {
         switch(stat) {
             case "Attack":
-                adjustAttack(2)
+                adjustAttack(1.2)
                 adjustDefense(1)
                 adjustLuck(1)
                 break
             case "Defense":
                 adjustAttack(1)
-                adjustDefense(2)
+                adjustDefense(1.2)
                 adjustLuck(1)
                 break
             case "Luck":
                 adjustAttack(1)
                 adjustDefense(1)
-                adjustLuck(2)
+                adjustLuck(1.2)
                 break
             default:
                 adjustAttack(1)
@@ -127,14 +132,14 @@ export const setupBattleField: setupBattleFieldFunction = (
         reduceValue: damagePlayer
     }] = useStatBar(
         "Player Health",
+        PlayerStats.current_health,
         PlayerStats.max_health,
-        PlayerStats.max_health,
-        (current_health) => {
-            if(current_health < 1) {
+        (_) => {
+            if(battlefieldDataRef.current.player_current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
                 if(!battlefieldDataRef.current.has_ended){
-                    onBattleEnd("Opponent")
+                    onBattleEnd("Opponent", 0)
                     battlefieldDataRef.current.has_ended = true
                 }
 
@@ -149,33 +154,54 @@ export const setupBattleField: setupBattleFieldFunction = (
         freezeBar:freezeEnemyAttack,
         unfreezeBar: unfreezeEnemyAttack,
         startCountdown: startEnemyAttack
-    }] = useCountDownBar("Attack", 4100, () => {
+    }] = useCountDownBar("Attack", EnemyStats.attack_cooldown, () => {
         const damage_calc = EnemyStats.attack_damage - battlefieldDataRef.current.player_defense_stack
+        const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
         const actual_damage = damage_calc < 0? 0: damage_calc
-        damagePlayer(actual_damage)
-        battlefieldDataRef.current.player_defense_stack = 0
+        const mult = critted? 1.2: 1
+
+        console.log(
+            EnemyStats.attack_damage - battlefieldDataRef.current.player_defense_stack
+            ,battlefieldDataRef.current.player_defense_stack
+        )
+
+        damagePlayer(actual_damage * mult)
+        battlefieldDataRef.current.player_current_health = 
+            battlefieldDataRef.current.player_current_health - 
+            (actual_damage * mult)
+        battlefieldDataRef.current.player_defense_stack = PlayerStats.defense_base
+
+
+        if(critted)
+            battlefieldDataRef.current.enemy_luck_stack = EnemyStats.luck_base;
     })
     const [EnemyFreezeBar, {
         freezeBar:freezeEnemyFreeze,
         unfreezeBar: unfreezeEnemyFreeze,
         startCountdown: startEnemyFreeze
-    }] = useCountDownBar("Freeze", 4000, () => {
+    }] = useCountDownBar("Freeze", EnemyStats.freeze_cooldown, () => {
             if(!getIsActive())
-                freezePlayer(500);
+                freezePlayer(EnemyStats.freeze_duration);
         })
     const [EnemyDefenseBar, {
         freezeBar:freezeEnemyDefense,
         unfreezeBar: unfreezeEnemyDefense,
         startCountdown: startEnemyDefense
-    }] = useCountDownBar("Defense", 4100, () => () => {
-        battlefieldDataRef.current.enemy_defense_stack += 50
+    }] = useCountDownBar("Defense", EnemyStats.defense_cooldown, () => () => {
+        const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
+        const mult = critted? 1.2: 1
+
+        battlefieldDataRef.current.enemy_defense_stack += EnemyStats.defense_build * mult
+
+        if(critted)
+            battlefieldDataRef.current.enemy_luck_stack = EnemyStats.luck_base;
     })
     const [EnemyLuckBar, {
         freezeBar:freezeEnemyLuck,
         unfreezeBar: unfreezeEnemyLuck,
         startCountdown: startEnemyLuck
-    }] = useCountDownBar("Luck", 4100, () => {
-        battlefieldDataRef.current.enemy_luck_stack += 1
+    }] = useCountDownBar("Luck", EnemyStats.luck_cooldown, () => {
+        battlefieldDataRef.current.enemy_luck_stack += EnemyStats.luck_build
     })
 
     const[EnemyHealthBar, {
@@ -185,11 +211,12 @@ export const setupBattleField: setupBattleFieldFunction = (
         PlayerStats.max_health,
         PlayerStats.max_health,
         (current_health) => {
+            console.log(current_health)
             if(current_health < 1) {
                 freezePlayer(Infinity)
                 freezeEnemy(Infinity)
                 if(!battlefieldDataRef.current.has_ended) {
-                    onBattleEnd("Player")
+                    onBattleEnd("Player", battlefieldDataRef.current.player_current_health)
                     battlefieldDataRef.current.has_ended = true
                 }
             }

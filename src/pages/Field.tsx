@@ -1,6 +1,6 @@
-import {FC} from 'react'
+import {FC, useEffect, useRef} from 'react'
 import { setupBattleField } from '../services/battle';
-import { getPlayerStats, useInitPlayerStats, usePlayerRounds } from '../services/stats';
+import { getPlayerStats, usePlayerRounds } from '../services/stats';
 import { useNavigate } from 'react-router-dom';
 import { getEnemyStats } from '../services/enemy';
 
@@ -12,6 +12,15 @@ export const Field: StagePage = () => {
     const redirect = useNavigate()
     const nextRound = usePlayerRounds()
 
+    console.log(PlayerData, EnemyData)
+
+    const dialogRef = useRef<HTMLDialogElement>(null)
+
+    useEffect(() => {
+        dialogRef.current?.showModal()
+    }, [])
+
+
     if(PlayerData === undefined) {
         redirect("/");
         return <></>
@@ -22,16 +31,14 @@ export const Field: StagePage = () => {
     }
 
     const [EnemyUI, PlayerUI, { 
-        freezePlayer,
         startBattle,
-        pauseBattle,
-        resumeBattle
     }] = setupBattleField(
         PlayerData, 
         EnemyData,
-        (victor: string) => {
+        (victor: string, health: number) => {
+            console.log(victor)
             if(victor === "Player") {
-                nextRound(EnemyData.reward_meat, EnemyData.reward_points)
+                nextRound(EnemyData.reward_meat, EnemyData.reward_points, health)
                 if(PlayerData.phase > 3) {
                     redirect("/end")
                 } else {
@@ -39,35 +46,25 @@ export const Field: StagePage = () => {
                 }
             }
 
-            if(victor === "Enemy") {
-                redirect("/end")
+            if(victor === "Opponent") {
+                redirect("/end-game")
             }
         }
     )
 
-    const resetStats = useInitPlayerStats()
-
     return (
         <>
+            <dialog ref={dialogRef}>
+                <button onClick={() => {
+                    startBattle()
+                    dialogRef.current?.close()
+                }}>Start Game</button>
+            </dialog>
             <div id="game--ui">
-                <div>
-                    <button>View Ship Stats</button>
-                </div>
                 <p>Player Actions:</p>
                 <PlayerUI />
                 <p>Enemy Actions:</p>
                 <EnemyUI />
-                <div>
-                    <p>Dev Actions:</p>
-                    <button onClick={startBattle}>Start Game</button>
-                    <button onClick={() => freezePlayer(1000)}>Freeze Player</button>
-                    <button onClick={pauseBattle}>Pause Game</button>
-                    <button onClick={resumeBattle}>Resume Game</button>
-                    <button onClick={resetStats}>Reset Stats</button>
-                    <div id="game--log">
-                        <p>Log Starts Here</p>
-                    </div>
-                </div>
             </div>
             
         </>

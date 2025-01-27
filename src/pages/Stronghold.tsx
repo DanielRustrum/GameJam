@@ -11,7 +11,7 @@ export const Stronghold: StrongholdPage = () => {
     let [upgrade_points, setUpgradePoints] = useState(PlayerData.upgrade_points)
     let [max_health, setMaxHealth] = useState(PlayerData.max_health)
     let [attack_damage, setAttackDamage] = useState(PlayerData.attack_damage)
-    let [attack_cooldown, setAttackCooldown] = useState(PlayerData.max_health)
+    let [attack_cooldown, setAttackCooldown] = useState(PlayerData.attack_cooldown)
     let [defense_base, setDefenseBase] = useState(PlayerData.defense_base)
     let [defense_build, setDefenseBuild] = useState(PlayerData.defense_build)
     let [defense_cooldown, setDefenseCooldown] = useState(PlayerData.defense_cooldown)
