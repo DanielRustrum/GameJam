@@ -3,6 +3,7 @@ import { setupBattleField } from '../services/battle';
 import { getPlayerStats, usePlayerRounds } from '../services/stats';
 import { useNavigate } from 'react-router-dom';
 import { getEnemyStats } from '../services/enemy';
+import { EnemySprite } from '../components/Field/EnemySprite';
 
 type StagePage = FC<{}>
 
@@ -14,10 +15,12 @@ export const Field: StagePage = () => {
 
     console.log(PlayerData, EnemyData)
 
-    const dialogRef = useRef<HTMLDialogElement>(null)
+    const startDialog = useRef<HTMLDialogElement>(null)
+    const endDialog = useRef<HTMLDialogElement>(null)
+    
 
     useEffect(() => {
-        dialogRef.current?.showModal()
+        startDialog.current?.showModal()
     }, [])
 
 
@@ -39,11 +42,7 @@ export const Field: StagePage = () => {
             console.log(victor)
             if(victor === "Player") {
                 nextRound(EnemyData.reward_meat, EnemyData.reward_points, health)
-                if(PlayerData.phase > 3) {
-                    redirect("/end")
-                } else {
-                    redirect("/upgrade")
-                }
+                endDialog.current?.showModal()
             }
 
             if(victor === "Opponent") {
@@ -54,19 +53,74 @@ export const Field: StagePage = () => {
 
     return (
         <>
-            <dialog ref={dialogRef}>
-                <button onClick={() => {
-                    startBattle()
-                    dialogRef.current?.close()
-                }}>Start Game</button>
+            <dialog 
+                ref={startDialog}
+                className='mar-auto'
+            >
+                <div
+                    className='
+                        ui--container flex columns space-between v-centered 
+                        span-width-30 mar-auto span-height-20
+                    '
+                >
+                    <div>
+                        <h2 className='text-centered'>Round {PlayerData.round}</h2>
+                        <h3 className='text-centered'>Phase {PlayerData.phase}</h3>
+                    </div>
+                    <button 
+                        className='full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onClick={() => {
+                            startBattle()
+                            startDialog.current?.close()
+                        }}
+                    >Start!</button>
+                </div>
             </dialog>
-            <div id="game--ui">
-                <p>Player Actions:</p>
+            <dialog 
+                className='mar-auto'
+                ref={endDialog}
+            >
+                <div
+                    className='ui--container flex columns space-between span-width-30 mar-auto span-height-40'
+                >
+                    <div>
+                        <h2 className='text-centered pad-bottom-25px'>You have Defeated the Dragon!</h2>
+                        <h3 className='text-centered pad-bottom-5px'>You Get:</h3>
+                        <p className='text-centered'>{EnemyData.reward_meat} Dragon Meat</p>
+                        <p className='text-centered'>{EnemyData.reward_points} Stat Points</p>
+                    </div>
+                    <button 
+                        className='full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onClick={() => {
+                            if(PlayerData.phase > 3) {
+                                redirect("/end")
+                            } else {
+                                redirect("/upgrade")
+                            }
+                        }}
+                    >
+                        Go to Stronghold
+                    </button>
+                </div>
+            </dialog>
+            <div id="game--ui" className='flex full-height space-between v-end pad-10px'>
                 <PlayerUI />
-                <p>Enemy Actions:</p>
                 <EnemyUI />
             </div>
-            
+            <div 
+                className="mar-auto flex v-centered space-between span-width-100 pad-25px" 
+                style={{
+                    zIndex: "-1",
+                    position: 'fixed',
+                    top: "0px",
+                    left: "0px",
+                    right: "0px",
+                    bottom: "10vh"
+                }}
+            >
+                <p>Player Goes Here</p>
+                <EnemySprite />
+            </div>
         </>
     )
 }

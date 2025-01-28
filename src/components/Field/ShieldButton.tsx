@@ -39,7 +39,8 @@ export const useShieldButton = (
             }
         }, [disabled_time_remaining])
 
-        return <button 
+        return <button
+            className="ui--container" 
             disabled={is_disabled}
             onClick={() => {
                 setIsDisabled(true)

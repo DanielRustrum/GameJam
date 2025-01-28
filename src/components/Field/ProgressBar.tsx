@@ -23,7 +23,7 @@ export const ProgressBar: BarType = ({
     return (<>
         <div 
             role="progressbar"
-            className='progress'
+            className='progress  border-round-4px text-bold'
             style={{
                 width: "20vw",
                 height: "2em",
@@ -33,7 +33,7 @@ export const ProgressBar: BarType = ({
             data-label={bar_text}
         >
             <span 
-                className='value'
+                className='value border-round-4px'
                 style={{
                     width: `${percentage}%`,
                     backgroundColor: backgroundColor,

@@ -42,62 +42,91 @@ export const Stronghold: StrongholdPage = () => {
     const TempUpgrade: 
         FC<{name: string, stat: number, onClick: () => void}> = 
         ({name, stat, onClick}) => (
-            <div>
-                <p>{name}: {stat}</p>
-                <button onClick={onClick}>Upgrade</button>
+            <div className='flex space-between pad-vert-10px'>
+                <p className='text-bold'>{name}: {stat}</p>
+                <button 
+                    className='bg-color-none border-round-4px text-bold'
+                    onClick={onClick}
+                >Upgrade</button>
             </div>
         )
     
     return (
-        <div>
-            <p>Stat Points: {upgrade_points}</p>
-            <div>
-                <p>Health: {max_health}</p>
-                <button onClick={() => upgradeStat("max_health")}>Upgrade</button>
+        <div className='flex columns v-centered h-centered full-height gap-25px span-width-50 mar-auto'>
+            <div className='ui--container full-width'>
+                <h1 className='text-centered'>Stronghold</h1>
+                <p className='text-centered'>Available Stat Points: {upgrade_points}</p>
             </div>
-            <TempUpgrade 
-                name="Attack Damage" 
-                stat={attack_damage}
-                onClick={() => upgradeStat("attack_damage")}
-            />
-            <TempUpgrade 
-                name="Attack Cooldown" 
-                stat={attack_cooldown}
-                onClick={() => upgradeStat("attack_cooldown")}
-            />
-            <TempUpgrade 
-                name="Defense Base" 
-                stat={defense_base}
-                onClick={() => upgradeStat("defense_base")}
-            />
-            <TempUpgrade 
-                name="Defense Build" 
-                stat={defense_build}
-                onClick={() => upgradeStat("defense_build")}
-            />
-            <TempUpgrade 
-                name="Defense Cooldown" 
-                stat={defense_cooldown}
-                onClick={() => upgradeStat("defense_cooldown")}
-            />
-            <TempUpgrade 
-                name="Luck Base" 
-                stat={luck_base}
-                onClick={() => upgradeStat("luck_base")}
-            />
-            <TempUpgrade 
-                name="Luck Build" 
-                stat={luck_build}
-                onClick={() => upgradeStat("luck_build")}
-            />
-            <TempUpgrade 
-                name="Luck Cooldown" 
-                stat={luck_cooldown}
-                onClick={() => upgradeStat("luck_cooldown")}
-            />
-            <button onClick={() => {
-                navigate("/explore")
-            }}>Finshed: Go to Next Round</button>
+            <div className='flex space-between span-width-50 gap-10px'>
+                <div className='ui--container fill-width'>
+                    <h2 className='text-centered'>Offense</h2>
+                    <TempUpgrade 
+                        name="Attack Damage" 
+                        stat={attack_damage}
+                        onClick={() => upgradeStat("attack_damage")}
+                    />
+                    <TempUpgrade 
+                        name="Attack Cooldown" 
+                        stat={attack_cooldown}
+                        onClick={() => upgradeStat("attack_cooldown")}
+                    />
+                </div>
+                <div className='ui--container fill-width'> 
+                    <h2 className='text-centered'>Defense</h2>
+                    <TempUpgrade 
+                        name="Max Health" 
+                        stat={max_health}
+                        onClick={() => upgradeStat("max_health")}
+                    />
+                    <TempUpgrade 
+                        name="Defense Base" 
+                        stat={defense_base}
+                        onClick={() => upgradeStat("defense_base")}
+                    />
+                    <TempUpgrade 
+                        name="Defense Build" 
+                        stat={defense_build}
+                        onClick={() => upgradeStat("defense_build")}
+                    />
+                    <TempUpgrade 
+                        name="Defense Cooldown" 
+                        stat={defense_cooldown}
+                        onClick={() => upgradeStat("defense_cooldown")}
+                    />
+                </div>
+                <div className='ui--container fill-width'>
+                    <h2 className='text-centered'>Crit</h2>
+                    <TempUpgrade 
+                        name="Luck Base" 
+                        stat={luck_base}
+                        onClick={() => upgradeStat("luck_base")}
+                    />
+                    <TempUpgrade 
+                        name="Luck Build" 
+                        stat={luck_build}
+                        onClick={() => upgradeStat("luck_build")}
+                    />
+                    <TempUpgrade 
+                        name="Luck Cooldown" 
+                        stat={luck_cooldown}
+                        onClick={() => upgradeStat("luck_cooldown")}
+                    />
+                </div>
+                
+                
+                
+                
+            </div>
+            <div className='ui--container flex full-width h-centered'>
+                <button
+                    className='pad-15px bg-color-none border-round-4px text-bold' 
+                    onClick={() => {
+                        navigate("/explore")
+                    }}
+                >
+                    Go to Navigation
+                </button>
+            </div>
         </div>
     )
 }

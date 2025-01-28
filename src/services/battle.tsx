@@ -266,22 +266,30 @@ export const setupBattleField: setupBattleFieldFunction = (
     // * Battle Field UI
     const PlayerUI = () => {
         return (
-            <div>
+            <div className="flex gap-25px">
+                <div className="ui--container flex columns gap-10px">
+                    <PlayerHealthBar />
+                    <div className="flex gap-15px">
+                        <AttackBar />
+                        <AttackFocusButton />
+                    </div>
+                    <div className="flex gap-15px">
+                        <DefenseBar />
+                        <DefenseFocusButton />
+                    </div>
+                    <div className="flex gap-15px">
+                        <LuckBar />
+                        <LuckFocusButton />
+                    </div>
+                </div>
                 <ShieldButton />
-                <PlayerHealthBar />
-                <AttackBar />
-                <AttackFocusButton />
-                <DefenseBar />
-                <DefenseFocusButton />
-                <LuckBar />
-                <LuckFocusButton />
             </div>
         )
     }
 
     const EnemyUI = () => {
         return (
-            <div>
+            <div className="ui--container flex columns gap-10px">
                 <EnemyHealthBar />
                 <EnemyAttackBar />
                 <EnemyFreezeBar />

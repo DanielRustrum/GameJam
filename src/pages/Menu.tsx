@@ -15,12 +15,20 @@ export const Menu: MenuPage = () => {
     const initPlayer = useInitPlayerStats()
 
     return (
-        <div style={{width: "100vw", height: "100vh"}}>
+        <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
             <h1>Game Name</h1>
-            <button onClick={() => {
-              initPlayer()
-              navigate("/upgrade")  
-            }}>Start</button>
+            <div>
+                <button
+                    style={{padding: "10px 80px"}}
+                    className='ui--container text-bold'
+                    onClick={() => {
+                        initPlayer()
+                        navigate("/upgrade")  
+                    }}
+                >
+                    Start
+                </button>
+            </div>
         </div>
     )
 }

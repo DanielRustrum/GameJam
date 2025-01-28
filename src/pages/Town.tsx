@@ -1,5 +1,5 @@
 import {FC, useState} from 'react'
-import { PlayerBucketData, usePlayerBucket } from '../services/stats'
+import { PlayerBucketData, usePlayerBucket, usePlayerRounds } from '../services/stats'
 import { useNavigate } from 'react-router-dom'
 
 type TownPage = FC<{}>
@@ -49,28 +49,57 @@ const useTrader: useTraderHook = () => {
 
 export const Town: TownPage = () => {
     const [stock, trade] = useTrader()
+    const [PlayerData, _] = usePlayerBucket()
     const redirect = useNavigate()
+    const next_round = usePlayerRounds()
+    const [current_health, setCurrentHealth] = useState(PlayerData?.current_health ?? 0)
+
+    if(PlayerData === undefined) return <></>
     return (
-        <div>
-            <button
-                disabled={stock < 3}
-                onClick={() => {
-                    trade(3, "heal")
-                }}
-            >
-                Ship Repair (Costs 3 Meat)
-            </button>
-            <button
-                disabled={stock < 2}
-                onClick={() => {
-                    trade(2, "upgrade")
-                }}
-            >
-                Stat Point (Costs 2 Meat)
-            </button>
-            <button 
-                onClick={() => {redirect("/upgrade")}}
-            >Leave Town</button>
+        <div className='mar-auto flex columns v-centered h-centered gap-25px full-height span-width-50'>
+            <div className='ui--container span-width-50'>
+                <h1 className='text-centered'>Welcome to Town!</h1>
+                <h2 className='text-centered'>Do you want to trade for anything?</h2>
+                <p className='text-centered pad-top-25px'>Meat Available for Trade: {stock}</p>
+            </div>
+            <div className='flex space-between span-width-50 gap-25px'>
+                <button
+                    className='ui--container fill-width text-bold'
+                    disabled={stock < 3}
+                    onClick={() => {
+                        trade(3, "heal")
+                        const new_current = 200 + PlayerData.current_health
+
+                        if (new_current >= PlayerData.current_health) {
+                            setCurrentHealth( PlayerData.max_health)
+                        } else {
+                            setCurrentHealth(new_current)
+                        }
+                    }}
+                >
+                    Ship Repair <br/>
+                    Health: {current_health} / {PlayerData.max_health}
+                    <br /><br />
+                    Repair the Ship by 200 at the cost of 3 Meat
+                </button>
+                <button
+                    className='ui--container fill-width text-bold'
+                    disabled={stock < 2}
+                    onClick={() => {
+                        trade(2, "upgrade")
+                    }}
+                >
+                    Stat Point  <br /><br />
+                    Get 1 stat point at the cost of 2 Meat
+                </button>
+                <button 
+                    className='ui--container fill-width text-bold'
+                    onClick={() => {
+                        next_round(0,0,PlayerData.current_health)
+                        redirect("/upgrade")
+                    }}
+                >All Done!</button>
+            </div>
         </div>
     )
 }

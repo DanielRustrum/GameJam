@@ -1,0 +1,29 @@
+@use "./styles/reset.scss";
+@use "./styles/micro.scss";
+
+body { 
+    background-color: #80acaa;
+    --ui--background-color: rgb(216, 204, 124);
+    --ui--border-color: rgb(110, 47, 59);
+}
+
+.ui--container {
+    background-color: var(--ui--background-color);
+    border: 5px solid var(--ui--border-color);
+    padding: 40px;
+    border-radius: 15px;
+}
+
+.ui--container:disabled {
+    background-color: rgba(216, 204, 124, .5);
+    border-color:rgba(110, 47, 59, .5);
+    
+}
+
+dialog {
+    background-color: inherit;
+    border: 0px;
+}
+dialog::backdrop {
+    background-color: #80acaa50;
+}

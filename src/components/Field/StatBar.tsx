@@ -57,7 +57,8 @@ export const useStatBar: useStatBarHook = (
         }))
         
         return <ProgressBar
-            backgroundColor="red"
+            backgroundColor="#96312e"
+            barColor="#978248"
             bar_text={bar_name}
             current_value={stat}
             max_value={max_value}

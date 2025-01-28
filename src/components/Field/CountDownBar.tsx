@@ -127,15 +127,15 @@ export const useCountDownBar: useCountDownBarHook = (
 
         const bar_text = is_frozen? 
             `Frozen! ${freeze_timer !== 0? freeze_timer: ""}`: 
-            `${bar_name}: ${current_value}/${max_value}`
+            `${bar_name}`
 
         const bar_color = is_frozen? 
-            "lightblue": 
+            "#c3dde7": 
                 rate > 1? 
-                "grey": 
+                "#978248": 
                     rate < 1?
-                    "crimson":
-                    "blue"
+                    "#d1675a":
+                    "#398eb2"
 
 
         return <ProgressBar 
@@ -143,7 +143,7 @@ export const useCountDownBar: useCountDownBarHook = (
             max_value={max_value} 
             current_value={current_value}
             backgroundColor={bar_color}
-            barColor={is_frozen? "lightblue": "#c9c9c9"}
+            barColor={is_frozen? "#c3dde7": "#978248"}
         />
     }
 

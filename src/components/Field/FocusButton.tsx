@@ -50,6 +50,7 @@ export const useFocusButton = (
                 setIsDisabled(set)
             }
             return <button 
+                className="bg-color-none border-round-4px text-bold"
                 disabled={is_disabled}
                 onClick={() => {
                     if(!FocusRef.current.is_disabled) {
@@ -64,7 +65,7 @@ export const useFocusButton = (
                     }
                 }}
             >
-                {stat}
+                Focus on {stat}
             </button>
         })
     }
