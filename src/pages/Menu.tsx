@@ -17,7 +17,7 @@ export const Menu: MenuPage = () => {
     return (
         <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
             <h1>Game Name</h1>
-            <div>
+            <div className='flex columns gap-10px'>
                 <button
                     style={{padding: "10px 80px"}}
                     className='ui--container text-bold'
@@ -27,6 +27,16 @@ export const Menu: MenuPage = () => {
                     }}
                 >
                     Start
+                </button>
+                <button
+                    style={{padding: "10px 80px"}}
+                    className='ui--container text-bold'
+                    onClick={() => {
+                        initPlayer()
+                        navigate("/tutorial")  
+                    }}
+                >
+                    See Tutorial
                 </button>
             </div>
         </div>

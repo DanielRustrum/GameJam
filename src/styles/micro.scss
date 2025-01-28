@@ -77,6 +77,12 @@ ul.rows {display:inline-block}
     .span-width-#{$value}0 {
         width: calc($value*10vw);
     }
+    .span-max-width-#{$value}0 {
+        max-width: calc($value*10vw);
+    }
+    .span-min-width-#{$value}0 {
+        min-width: calc($value*10vw);
+    }
 }
 .full-height {
     height: 100vh;
@@ -88,6 +94,10 @@ ul.rows {display:inline-block}
 
 .auto-width {
     width: auto;
+}
+
+.auto-height {
+    height: auto;
 }
 
 
@@ -106,4 +116,17 @@ ul.rows {display:inline-block}
     .border-round-#{$value}px {
         border-radius: #{$value}px;
     }
+}
+
+// Image
+.float-left {float: left;}
+.float-right {float: right;}
+
+//scroll
+.no-scroll {
+    overflow: hidden;
+}
+
+.v-scroll {
+    overflow: scroll;
 }

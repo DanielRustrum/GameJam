@@ -9,6 +9,7 @@ import { Stronghold } from './pages/Stronghold';
 import { End } from './pages/Gameover';
 import { Town } from './pages/Town';
 import { Explore } from './pages/Explore';
+import { Tutorial } from './pages/Tutorial';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/explore" element={<Explore />} />
         <Route path="/end-game" element={<End />} />
         <Route path="/town" element={<Town />} />
+        <Route path="/tutorial" element={<Tutorial />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
