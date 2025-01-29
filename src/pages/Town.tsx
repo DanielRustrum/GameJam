@@ -1,6 +1,7 @@
 import {FC, useState} from 'react'
 import { usePlayerBucket, usePlayerRounds } from '../services/stats'
 import { useNavigate } from 'react-router-dom'
+import { useSoundEffect } from '../hooks/useSoundEffect'
 
 type TownPage = FC<{}>
 
@@ -11,7 +12,6 @@ type useTraderHook = () => [
 
 const useTrader: useTraderHook = () => {
     const [PlayerData, setPlayerData] = usePlayerBucket()
-    if (PlayerData === undefined) return [0, (_, __) => {}]
 
     const [current_meat, setCurrentMeat] = useState(PlayerData("meat_count"))
 
@@ -48,6 +48,8 @@ export const Town: TownPage = () => {
     const [PlayerData, _] = usePlayerBucket()
     const redirect = useNavigate()
     const next_round = usePlayerRounds()
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
     const [current_health, setCurrentHealth] = useState(PlayerData("current_health"))
 
     if(PlayerData === undefined) return <></>
@@ -60,9 +62,11 @@ export const Town: TownPage = () => {
             </div>
             <div className='flex space-between full-width gap-25px'>
                 <button
-                    className='ui--container fill-width text-bold'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container fill-width text-bold'
                     disabled={stock < 3}
                     onClick={() => {
+                        playClick()
                         trade(3, "heal")
                         const new_current = 200 + PlayerData("current_health")
 
@@ -79,9 +83,11 @@ export const Town: TownPage = () => {
                     Repair the Ship by 200 at the cost of 3 Meat
                 </button>
                 <button
-                    className='ui--container fill-width text-bold'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container fill-width text-bold'
                     disabled={stock < 2}
                     onClick={() => {
+                        playClick()
                         trade(2, "upgrade")
                     }}
                 >
@@ -89,8 +95,10 @@ export const Town: TownPage = () => {
                     Get 1 stat point at the cost of 2 Meat
                 </button>
                 <button 
-                    className='ui--container fill-width text-bold'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container fill-width text-bold'
                     onClick={() => {
+                        playClick()
                         next_round(0,0,PlayerData("current_health"))
                         redirect("/upgrade")
                     }}

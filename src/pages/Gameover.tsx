@@ -1,6 +1,7 @@
 import {FC} from 'react'
 import { getPlayerStats, useInitPlayerStats } from '../services/stats'
 import { useNavigate } from 'react-router-dom'
+import { useSoundEffect } from '../hooks/useSoundEffect'
 
 type EndPage = FC<{}>
 
@@ -8,6 +9,8 @@ export const End: EndPage = () => {
     const navigate = useNavigate()
     const initPlayer = useInitPlayerStats()
     const PlayerData = getPlayerStats()
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
 
     const message = (PlayerData && PlayerData("phase") > 3)? 
         "Congrats! You Made it to the End!":
@@ -21,8 +24,10 @@ export const End: EndPage = () => {
             </div>
             <div className='flex space-between ui--gap ui--span-page'>
                 <button
-                    className='ui--container fill-width text-bold'
+                    className='ui--button-interact-2 ui--container fill-width text-bold'
+                    onMouseEnter={() => {playClickEnter()}}
                     onClick={() => {
+                        playClick()
                         initPlayer()
                         navigate("/upgrade")  
                     }}
@@ -30,8 +35,10 @@ export const End: EndPage = () => {
                     Play Again!
                 </button>
                 <button
-                    className='ui--container fill-width text-bold'
+                    className='ui--button-interact-2 ui--container fill-width text-bold'
+                    onMouseEnter={() => {playClickEnter()}}
                     onClick={() => {
+                        playClick()
                         navigate("/")  
                     }}
                 >

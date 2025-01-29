@@ -90,6 +90,7 @@ body {
     }
 }
 
+
 .ui--mobile-full-width {
     @include device.not-on-desktop {
         width: 100%;
@@ -108,6 +109,14 @@ dialog {
 }
 dialog::backdrop {
     background-color: #80acaa50;
+}
+
+.ui--button-interact:hover {
+    scale: (1.1);
+}
+
+.ui--button-interact-2:hover {
+    scale: (1.02);
 }
 
 .sprite--entities {

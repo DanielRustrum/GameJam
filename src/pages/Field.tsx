@@ -4,6 +4,7 @@ import { getPlayerStats, usePlayerRounds } from '../services/stats';
 import { useNavigate } from 'react-router-dom';
 import { getEnemyStats } from '../services/enemy';
 import { EnemySprite } from '../components/Field/EnemySprite';
+import { useSoundEffect } from '../hooks/useSoundEffect';
 
 type StagePage = FC<{}>
 
@@ -12,6 +13,8 @@ export const Field: StagePage = () => {
     const EnemyData = getEnemyStats()
     const redirect = useNavigate()
     const nextRound = usePlayerRounds()
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
 
     const startDialog = useRef<HTMLDialogElement>(null)
     const endDialog = useRef<HTMLDialogElement>(null)
@@ -53,9 +56,11 @@ export const Field: StagePage = () => {
                         <h3 className='text-centered'>Phase {PlayerData("phase")}</h3>
                     </div>
                     <button 
-                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onMouseEnter={() => {playClickEnter()}}
+                        className='ui--button-interact-2 mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
                         onClick={() => {
                             startBattle()
+                            playClick()
                             startDialog.current?.close()
                         }}
                     >Start!</button>
@@ -78,8 +83,10 @@ export const Field: StagePage = () => {
                         <p className='text-centered'>{EnemyData("reward_points")} Stat Points</p>
                     </div>
                     <button 
-                        className='full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onMouseEnter={() => {playClickEnter()}}
+                        className='ui--button-interact-2 full-width pad-15px bg-color-none border-round-4px text-bold'
                         onClick={() => {
+                            playClick()
                             if(PlayerData("phase") > 3) {
                                 redirect("/end-game")
                             } else {

@@ -1,5 +1,6 @@
 import { FC, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useTimer } from "../../hooks/useTimer"
+import { useSoundEffect } from "../../hooks/useSoundEffect"
 
 export const useShieldButton = (
     active_duration: number = 1000,
@@ -15,7 +16,8 @@ export const useShieldButton = (
     }
 
     const SheldButtonWrapper = () => {
-
+        const playClickEnter = useSoundEffect("enter", true)
+        const playClick = useSoundEffect("click")
         const [ active_time_remaining, {start: startActiveTimer} ] = useTimer(active_duration, 100)
         const [ disabled_time_remaining, {start: startDisabledTimer} ] = useTimer(charge_duration, 100)
         const [is_disabled, setIsDisabled] = useState(false)
@@ -40,9 +42,11 @@ export const useShieldButton = (
         }, [disabled_time_remaining])
 
         return <button
-            className="ui--container ui--shield-button-mobile" 
+            className="ui--button-interact-2 ui--container ui--shield-button-mobile" 
+            onMouseEnter={() => {playClickEnter()}}
             disabled={is_disabled}
             onClick={() => {
+                playClick()
                 setIsDisabled(true)
                 setIsActive(true)
                 startActiveTimer()

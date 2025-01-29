@@ -2,6 +2,7 @@ import {FC} from 'react'
 import { generateEnemy } from '../services/enemy'
 import { useNavigate } from 'react-router-dom'
 import { getPlayerStats } from '../services/stats'
+import { useSoundEffect } from '../hooks/useSoundEffect'
 
 type ExplorePage = FC<{}>
 
@@ -9,6 +10,8 @@ export const Explore: ExplorePage = () => {
     const genEnemy = generateEnemy()
     const navigate = useNavigate()
     const PlayerData = getPlayerStats()
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
 
     return (
         <div className='flex columns mar-auto ui--span-page h-centered full-height gap-25px'>
@@ -18,17 +21,23 @@ export const Explore: ExplorePage = () => {
             </div>
             <div className='flex space-between ui--gap full-width'>
                 <button
-                    className='ui--container text-bold fill-width'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container text-bold fill-width'
                     disabled={PlayerData && PlayerData("round") === 5}
-                    onClick={() => navigate("/town")}
+                    onClick={() => {
+                        playClick()
+                        navigate("/town")
+                    }}
                 >
                     Go to Town <br/>
                     (Will take up 1 round)
                 </button>
                 <button
-                    className='ui--container text-bold fill-width'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container text-bold fill-width'
                     disabled={PlayerData && PlayerData("round") === 5}
                     onClick={() => {
+                        playClick()
                         genEnemy(false)
                         navigate("/field")
                     }}
@@ -36,8 +45,10 @@ export const Explore: ExplorePage = () => {
                     Fight Small Dragon
                 </button>
                 <button
-                    className='ui--container text-bold fill-width'
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact-2 ui--container text-bold fill-width'
                     onClick={() => {
+                        playClick()
                         genEnemy(true)
                         navigate("/field")
                     }}

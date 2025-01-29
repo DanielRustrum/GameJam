@@ -5,6 +5,7 @@ import { useShieldButton } from "../components/Field/ShieldButton"
 import { useFocusButton } from "../components/Field/FocusButton"
 import { getPlayerStats } from "./stats"
 import { getEnemyStats } from "./enemy"
+import { useSoundEffect } from "../hooks/useSoundEffect"
 
 
 type setupBattleFieldFunction = (
@@ -31,6 +32,11 @@ export const setupBattleField: setupBattleFieldFunction = (
 ) => {
     const PlayerData = getPlayerStats()
     const EnemyData = getEnemyStats()
+
+    const playCooldown = useSoundEffect("cooldown", true)
+    const playPlayerAttack = useSoundEffect("player_attack")
+    const playDragonAttack = useSoundEffect("dragon_attack")
+    const playFreezeAttack = useSoundEffect("freeze_attack")
 
     const battlefieldDataRef = useRef({
         player_defense_stack: PlayerData("defense_base"),
@@ -71,6 +77,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         adjustRate: adjustAttack,
         startCountdown: startPlayerAttack
     }] = useCountDownBar("Attack", PlayerData("attack_cooldown"), () => {
+        playPlayerAttack()
         const damage_calc = PlayerData("attack_damage") - battlefieldDataRef.current.enemy_defense_stack
         const actual_damage = damage_calc < 0? 0: damage_calc
 
@@ -90,6 +97,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         adjustRate: adjustDefense,
         startCountdown: startPlayerDefense
     }] = useCountDownBar("Defense", PlayerData("defense_cooldown"), () => {
+        playCooldown()
         const critted = isCrit(battlefieldDataRef.current.player_luck_stack)
         const mult = critted? 1.2: 1
 
@@ -103,6 +111,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         adjustRate: adjustLuck,
         startCountdown: startPlayerLuck
     }] = useCountDownBar("Luck", PlayerData("luck_cooldown"), () => {
+        playCooldown()
         battlefieldDataRef.current.player_luck_stack += PlayerData("luck_build")
     })
     
@@ -165,6 +174,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeEnemyAttack,
         startCountdown: startEnemyAttack
     }] = useCountDownBar("Attack", EnemyData("attack_cooldown"), () => {
+        playDragonAttack()
         const damage_calc = EnemyData("attack_damage") - battlefieldDataRef.current.player_defense_stack
         const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
         const actual_damage = damage_calc < 0? 0: damage_calc
@@ -187,14 +197,16 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeEnemyFreeze,
         startCountdown: startEnemyFreeze
     }] = useCountDownBar("Freeze", EnemyData("freeze_cooldown"), () => {
-            if(!getIsActive())
+        playFreezeAttack()
+        if(!getIsActive())
                 freezePlayer(EnemyData("freeze_duration"));
-        })
+    })
     const [EnemyDefenseBar, {
         freezeBar:freezeEnemyDefense,
         unfreezeBar: unfreezeEnemyDefense,
         startCountdown: startEnemyDefense
     }] = useCountDownBar("Defense", EnemyData("defense_cooldown"), () => () => {
+        playCooldown()
         const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
         const mult = critted? 1.2: 1
 
@@ -208,6 +220,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeEnemyLuck,
         startCountdown: startEnemyLuck
     }] = useCountDownBar("Luck", EnemyData("luck_cooldown"), () => {
+        playCooldown()
         battlefieldDataRef.current.enemy_luck_stack += EnemyData("luck_build")
     })
 

@@ -4,8 +4,9 @@ type useLocalStorageBucket = <Casted = unknown>(
     bucket_name: string,
     CastFunc?: CallableFunction
 ) => [
-    (key: string) => Casted,
-    (key: string, set: Casted) => void
+    <T>(key: string, fallback?: T) => Casted,
+    (key: string, set: Casted) => void,
+    (key: string) => boolean
 ]
 
 export const useLocalStorageBucket:useLocalStorageBucket = 
@@ -14,13 +15,18 @@ export const useLocalStorageBucket:useLocalStorageBucket =
         CastFunc?
     ) => {
     return [
-        (key) => {
+        (key, fallback = undefined) => {
             if(CastFunc !== undefined)
                 return CastFunc(localStorage.getItem(`${bucket_name}.${key}`));
-            else
-                return localStorage.getItem(`${bucket_name}.${key}`);
+            else{
+                const result = localStorage.getItem(`${bucket_name}.${key}`)
+                if(result === null)
+                    return fallback;
+                return JSON.parse(result)
+            }
         },
-        (key, set) => localStorage.setItem(`${bucket_name}.${key}`, JSON.stringify(set))
+        (key, set) => localStorage.setItem(`${bucket_name}.${key}`, JSON.stringify(set)),
+        (key) => localStorage.getItem(`${bucket_name}.${key}`) === null
     ]
 }
 

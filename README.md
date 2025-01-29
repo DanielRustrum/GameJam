@@ -50,3 +50,10 @@ export default tseslint.config({
 ```
 
 ## Project Dragon Soup Tem
+
+
+
+## Attribution
+Royalty-Free Foley from:
+https://freesound.org/
+https://uppbeat.io/

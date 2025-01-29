@@ -1,5 +1,6 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react"
 import { useTimer } from "../../hooks/useTimer"
+import { useSoundEffect } from "../../hooks/useSoundEffect"
 
 export const useFocusButton = (
     stats: Array<string>,
@@ -36,6 +37,8 @@ export const useFocusButton = (
 
     for (const stat of stats) {
         Buttons.push(({}) => {
+            const playClickEnter = useSoundEffect("enter", true)
+            const playClick = useSoundEffect("click")
             const [disabled_time_remaining, {start}] = useTimer(1000, 100)
             const [is_disabled, setIsDisabled] = useState(false)
 
@@ -50,10 +53,12 @@ export const useFocusButton = (
                 setIsDisabled(set)
             }
             return <button 
-                className="bg-color-none border-round-4px text-bold fill-width ui--button"
+                className="ui--button-interact-2 bg-color-none border-round-4px text-bold fill-width ui--button"
+                onMouseEnter={() => {playClickEnter()}}
                 disabled={is_disabled}
                 onClick={() => {
                     if(!FocusRef.current.is_disabled) {
+                        playClick()
                         if(FocusRef.current.current_focus === stat)
                             FocusRef.current.current_focus = null;
                         else

@@ -1,44 +1,92 @@
-import {FC} from 'react'
+import {FC, useEffect, useRef, useState} from 'react'
 
-// import { useBackgroundMusic } from '../hooks/useBackgroundMusic'
-
-
-// import placeholder_music from '../assets/sounds/placeholder_music.mp3'
 import { useNavigate } from 'react-router-dom'
 import { useInitPlayerStats } from '../services/stats'
+import { setPermission, setVolume, useSoundEffect } from '../hooks/useSoundEffect'
+import { useLocalStorageBucket } from '../hooks/useLocalStorage'
 
 type MenuPage = FC<{}>
 
 export const Menu: MenuPage = () => {
-    // const [initiate_music, toggle_music] = useBackgroundMusic(placeholder_music, .25)
     const navigate = useNavigate()
     const initPlayer = useInitPlayerStats()
-
+    const dialogRef = useRef<HTMLDialogElement>(null)
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
+    const [getSetting, __, checkSetting] = useLocalStorageBucket("settings")
+    const [sound_state, setSoundState] = useState(getSetting("sound_permission"))
+    
+    useEffect(() => {
+        if(checkSetting("sound_permission"))
+            dialogRef.current?.showModal();
+    }, [])
+    
     return (
-        <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
-            <h1>Game Name</h1>
-            <div className='flex columns gap-10px'>
-                <button
-                    style={{padding: "10px 80px"}}
-                    className='ui--container text-bold'
-                    onClick={() => {
-                        initPlayer()
-                        navigate("/upgrade")  
-                    }}
-                >
-                    Start
-                </button>
-                <button
-                    style={{padding: "10px 80px"}}
-                    className='ui--container text-bold'
-                    onClick={() => {
-                        initPlayer()
-                        navigate("/tutorial")  
-                    }}
-                >
-                    See Tutorial
-                </button>
+        <>
+            <dialog ref={dialogRef} className='mar-auto'>
+                <div className='ui--container flex columns space-between v-centered ui--pad
+                        span-width-50 mar-auto span-height-30'>
+                    <h2>Do you want to play with sound?</h2>
+                    <button
+                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onClick={() => {
+                            setVolume(1)
+                            setPermission(true)
+                            playClick()
+                            dialogRef.current?.close()
+                        }}
+                    >Yes!</button>
+                    <button
+                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
+                        onClick={() => {
+                            setVolume(1)
+                            setPermission(false)
+                            dialogRef.current?.close()
+                        }}
+                    >No</button>
+                </div>
+            </dialog>
+            <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
+                <h1>Dragon Fish</h1>
+                <div className='flex columns gap-10px'>
+                    <button
+                        onMouseEnter={() => {playClickEnter()}}
+                        style={{padding: "10px 80px"}}
+                        className='ui--container text-bold'
+                        onClick={() => {
+                            initPlayer()
+                            playClick()
+                            navigate("/upgrade")  
+                        }}
+                    >
+                        Start
+                    </button>
+                    <button
+                        onMouseEnter={() => {playClickEnter()}}
+                        style={{padding: "10px 80px"}}
+                        className='ui--container text-bold'
+                        onClick={() => {
+                            playClick()
+                            navigate("/tutorial")  
+                        }}
+                    >
+                        See Tutorial
+                    </button>
+                    <button
+                        onMouseEnter={() => {playClickEnter()}}
+                        style={{padding: "10px 80px"}}
+                        className='ui--container text-bold'
+                        onClick={() => {
+                            setPermission(!getSetting("sound_permission"))
+                            setSoundState(!getSetting("sound_permission"))
+                            playClick()
+                        }}
+                    >
+                        Toggle Sound <br /><br />
+                        Sound is {sound_state? "off": "on"}
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     )
 }

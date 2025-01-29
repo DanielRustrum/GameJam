@@ -1,12 +1,16 @@
 import {FC, useState} from 'react'
 import { getPlayerStats, upgradePlayerStat } from '../services/stats'
 import { useNavigate } from 'react-router-dom'
+import { useSoundEffect } from '../hooks/useSoundEffect'
 
 type StrongholdPage = FC<{}>
 
 export const Stronghold: StrongholdPage = () => {
     const PlayerData = getPlayerStats()
     
+    const playClickEnter = useSoundEffect("enter", true)
+    const playClick = useSoundEffect("click")
+
     let [upgrade_points, setUpgradePoints] = useState(PlayerData("upgrade_points"))
     let [max_health, setMaxHealth] = useState(PlayerData("max_health"))
     let [attack_damage, setAttackDamage] = useState(PlayerData("attack_damage"))
@@ -47,8 +51,14 @@ export const Stronghold: StrongholdPage = () => {
                 >
                     <p className='text-bold ui--centered-text'>{name}: {stat}</p>
                     <button 
-                        className='bg-color-none border-round-4px text-bold'
-                        onClick={onClick}
+                        onMouseEnter={() => {playClickEnter()}}
+                        className='ui--button-interact bg-color-none border-round-4px text-bold'
+                        onClick={() => {
+                            onClick()
+                            
+                            if (PlayerData("upgrade_points") === 0) return;
+                            playClick()
+                        }}
                     >
                         Upgrade
                     </button>
@@ -124,8 +134,10 @@ export const Stronghold: StrongholdPage = () => {
             </div>
             <div className='ui--container flex full-width h-centered'>
                 <button
-                    className='pad-15px bg-color-none border-round-4px text-bold' 
+                    onMouseEnter={() => {playClickEnter()}}
+                    className='ui--button-interact pad-15px bg-color-none border-round-4px text-bold' 
                     onClick={() => {
+                        playClick()
                         navigate("/explore")
                     }}
                 >
