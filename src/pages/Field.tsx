@@ -13,8 +13,6 @@ export const Field: StagePage = () => {
     const redirect = useNavigate()
     const nextRound = usePlayerRounds()
 
-    console.log(PlayerData, EnemyData)
-
     const startDialog = useRef<HTMLDialogElement>(null)
     const endDialog = useRef<HTMLDialogElement>(null)
     
@@ -23,25 +21,12 @@ export const Field: StagePage = () => {
         startDialog.current?.showModal()
     }, [])
 
-
-    if(PlayerData === undefined) {
-        redirect("/");
-        return <></>
-    }
-
-    if(EnemyData === undefined) {
-        return <></>
-    }
-
     const [EnemyUI, PlayerUI, { 
         startBattle,
     }] = setupBattleField(
-        PlayerData, 
-        EnemyData,
         (victor: string, health: number) => {
-            console.log(victor)
             if(victor === "Player") {
-                nextRound(EnemyData.reward_meat, EnemyData.reward_points, health)
+                nextRound(EnemyData("reward_meat"), EnemyData("reward_points"), health)
                 endDialog.current?.showModal()
             }
 
@@ -64,8 +49,8 @@ export const Field: StagePage = () => {
                     '
                 >
                     <div>
-                        <h2 className='text-centered'>Round {PlayerData.round}</h2>
-                        <h3 className='text-centered'>Phase {PlayerData.phase}</h3>
+                        <h2 className='text-centered'>Round {PlayerData("round")}</h2>
+                        <h3 className='text-centered'>Phase {PlayerData("phase")}</h3>
                     </div>
                     <button 
                         className='full-width pad-15px bg-color-none border-round-4px text-bold'
@@ -86,14 +71,14 @@ export const Field: StagePage = () => {
                     <div>
                         <h2 className='text-centered pad-bottom-25px'>You have Defeated the Dragon!</h2>
                         <h3 className='text-centered pad-bottom-5px'>You Get:</h3>
-                        <p className='text-centered'>{EnemyData.reward_meat} Dragon Meat</p>
-                        <p className='text-centered'>{EnemyData.reward_points} Stat Points</p>
+                        <p className='text-centered'>{EnemyData("reward_meat")} Dragon Meat</p>
+                        <p className='text-centered'>{EnemyData("reward_points")} Stat Points</p>
                     </div>
                     <button 
                         className='full-width pad-15px bg-color-none border-round-4px text-bold'
                         onClick={() => {
-                            if(PlayerData.phase > 3) {
-                                redirect("/end")
+                            if(PlayerData("phase") > 3) {
+                                redirect("/end-game")
                             } else {
                                 redirect("/upgrade")
                             }

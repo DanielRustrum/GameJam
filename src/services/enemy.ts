@@ -17,51 +17,35 @@ export interface EnemyBucketData {
     reward_meat: number
 }
 
-const useEnemyBucket = () => useLocalStorageBucket<EnemyBucketData>("Enemy")
+const useEnemyBucket = () => useLocalStorageBucket<number>("Enemy", Number)
 
 export const getEnemyStats = () => {
     const [enemy_data] = useEnemyBucket()
     return enemy_data
 }
 
-export const generateEnemy = ():((is_large: boolean) => EnemyBucketData) => {
+export const generateEnemy = ():((is_large: boolean) => void) => {
     const PlayerData = getPlayerStats()
     const [_, setEnemyBucket] = useEnemyBucket()
 
-    const [round, phase] = 
-        PlayerData === undefined? 
-        [1,1]: 
-        [PlayerData.round, PlayerData.phase]
+    const [round, phase] = [PlayerData("round"), PlayerData("phase")]
 
     return (is_large = false) => {
         const size_mult = is_large? 3: 1
 
-        const enemy = {
-            max_health: (200 * (phase * 2) + (50 * round)) * size_mult, 
-            attack_damage: (10 * ((phase-1) * 2) + (5 * round)) * size_mult,
-            attack_cooldown: 6000 / phase - (100 * round),
-            freeze_duration: (200 * phase  + (50 * round)) * size_mult,
-            freeze_cooldown: 10000 / phase - (100 * round),
-            defense_base: (3 * (phase-1 * 2) + (5 * round-1)) * size_mult,
-            defense_build: 1 * (phase * 2) + (5 * round),
-            defense_cooldown: 6000 / phase - (100 * round),
-            luck_base: 1 * (phase * 2) + (5 * round),
-            luck_build: 1 * (phase * 2) + (5 * round),
-            luck_cooldown: 6000 / phase - (100 * round),
-            reward_points: (1 * phase  + (1 * round)) * size_mult,
-            reward_meat: (1 * phase  + (1 * round)) * size_mult,
-        }
+        setEnemyBucket("max_health", (200 * (phase * 2) + (50 * round)) * size_mult) 
+        setEnemyBucket("attack_damage", (10 * ((phase-1) * 2) + (5 * round)) * size_mult)
+        setEnemyBucket("attack_cooldown", 6000 / phase - (100 * round))
+        setEnemyBucket("freeze_duration", (200 * phase  + (50 * round)) * size_mult)
+        setEnemyBucket("freeze_cooldown", 10000 / phase - (100 * round))
+        setEnemyBucket("defense_base", (3 * (phase-1 * 2) + (5 * round-1)) * size_mult)
+        setEnemyBucket("defense_build", 1 * (phase * 2) + (5 * round))
+        setEnemyBucket("defense_cooldown", 6000 / phase - (100 * round))
+        setEnemyBucket("luck_base", 1 * (phase * 2) + (5 * round))
+        setEnemyBucket("luck_build", 1 * (phase * 2) + (5 * round))
+        setEnemyBucket("luck_cooldown", 6000 / phase - (100 * round))
+        setEnemyBucket("reward_points", (1 * phase  + (1 * round)) * size_mult)
+        setEnemyBucket("reward_meat", (1 * phase  + (1 * round)) * size_mult)
 
-        setEnemyBucket(enemy)
-        return enemy
-    }
-}
-
-export const useSetNextEnemy = () => {
-    const [enemy_data, setEnemyBucket] = useEnemyBucket()
-    if(enemy_data === undefined) return (_:EnemyBucketData) => {};
-
-    return (enemy: EnemyBucketData) => {
-        setEnemyBucket(enemy)
     }
 }

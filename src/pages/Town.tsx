@@ -1,5 +1,5 @@
 import {FC, useState} from 'react'
-import { PlayerBucketData, usePlayerBucket, usePlayerRounds } from '../services/stats'
+import { usePlayerBucket, usePlayerRounds } from '../services/stats'
 import { useNavigate } from 'react-router-dom'
 
 type TownPage = FC<{}>
@@ -13,34 +13,30 @@ const useTrader: useTraderHook = () => {
     const [PlayerData, setPlayerData] = usePlayerBucket()
     if (PlayerData === undefined) return [0, (_, __) => {}]
 
-    const [current_meat, setCurrentMeat] = useState(PlayerData.meat_count)
+    const [current_meat, setCurrentMeat] = useState(PlayerData("meat_count"))
 
-    const setStat = (stat: string, value: number) => setPlayerData((set: PlayerBucketData) => {
-        return { ...set, [stat]: value }
-    })
 
     const heal = (amount: number) => {
-        const new_current = amount + PlayerData.current_health
+        const new_current = amount + PlayerData("current_health")
 
-        if (new_current >= PlayerData.current_health) {
-            setStat("current_health", PlayerData.max_health)
+        if (new_current >= PlayerData("current_health")) {
+            setPlayerData("current_health", PlayerData("max_health"))
         } else {
-            setStat("current_health", new_current)
-
+            setPlayerData("current_health", new_current)
         }
     }
 
     return [
         current_meat,
         (meat_cost: number, transaction: string) => {
-            if(meat_cost > PlayerData.meat_count) return;
+            if(meat_cost > PlayerData("meat_count")) return;
 
             setCurrentMeat(meat => meat - meat_cost)
-            setStat("meat_count", PlayerData.meat_count - meat_cost)
+            setPlayerData("meat_count", PlayerData("meat_count") - meat_cost)
             if(transaction === "heal")
                 heal(200);
             if(transaction === "upgrade")
-                setStat("upgrade_points", PlayerData.upgrade_points + 1);
+                setPlayerData("upgrade_points", PlayerData("upgrade_points") + 1);
 
         }
     ]
@@ -52,7 +48,7 @@ export const Town: TownPage = () => {
     const [PlayerData, _] = usePlayerBucket()
     const redirect = useNavigate()
     const next_round = usePlayerRounds()
-    const [current_health, setCurrentHealth] = useState(PlayerData?.current_health ?? 0)
+    const [current_health, setCurrentHealth] = useState(PlayerData("current_health"))
 
     if(PlayerData === undefined) return <></>
     return (
@@ -68,17 +64,17 @@ export const Town: TownPage = () => {
                     disabled={stock < 3}
                     onClick={() => {
                         trade(3, "heal")
-                        const new_current = 200 + PlayerData.current_health
+                        const new_current = 200 + PlayerData("current_health")
 
-                        if (new_current >= PlayerData.current_health) {
-                            setCurrentHealth( PlayerData.max_health)
+                        if (new_current >= PlayerData("current_health")) {
+                            setCurrentHealth( PlayerData("max_health"))
                         } else {
                             setCurrentHealth(new_current)
                         }
                     }}
                 >
                     Ship Repair <br/>
-                    Health: {current_health} / {PlayerData.max_health}
+                    Health: {current_health} / {PlayerData("max_health")}
                     <br /><br />
                     Repair the Ship by 200 at the cost of 3 Meat
                 </button>
@@ -95,7 +91,7 @@ export const Town: TownPage = () => {
                 <button 
                     className='ui--container fill-width text-bold'
                     onClick={() => {
-                        next_round(0,0,PlayerData.current_health)
+                        next_round(0,0,PlayerData("current_health"))
                         redirect("/upgrade")
                     }}
                 >All Done!</button>

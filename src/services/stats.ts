@@ -26,7 +26,9 @@ export interface PlayerBucketData {
     round: number
 }
 
-export const usePlayerBucket = () => useLocalStorageBucket<PlayerBucketData>("Player")
+export const usePlayerBucket = () => useLocalStorageBucket<number>(
+    "Player", Number
+)
 const upgradeAlgo = (upgrade_step: number) => {
     const Denominator = Math.pow(Math.pow(10, upgrade_step - 6) / .6, .2)
     return Math.floor(1 + (4.5 / (1 + Denominator)))
@@ -35,31 +37,31 @@ const upgradeAlgo = (upgrade_step: number) => {
 
 export const useInitPlayerStats = () => {
     const [_, setPlayerData] = usePlayerBucket()
-    return () => setPlayerData({
-        max_health: 200,
-        max_health_step: 0,
-        current_health: 200,
-        attack_damage: 50,
-        attack_damage_step: 0,
-        attack_cooldown: 10000,
-        attack_cooldown_step: 0,
-        defense_base: 0,
-        defense_base_step: 0,
-        defense_build: 1,
-        defense_build_step: 0,
-        defense_cooldown: 10000,
-        defense_cooldown_step: 0,
-        luck_base: 0,
-        luck_base_step: 0,
-        luck_build: 1,
-        luck_build_step: 0,
-        luck_cooldown: 10000,
-        luck_cooldown_step: 0,
-        meat_count: 0,
-        upgrade_points: 5,
-        phase: 1,
-        round: 1
-    })
+    return () => {
+        setPlayerData("max_health", 200)
+        setPlayerData("max_health_step", 0)
+        setPlayerData("current_health", 200)
+        setPlayerData("attack_damage", 50)
+        setPlayerData("attack_damage_step", 0)
+        setPlayerData("attack_cooldown", 10000)
+        setPlayerData("attack_cooldown_step", 0)
+        setPlayerData("defense_base", 0)
+        setPlayerData("defense_base_step", 0)
+        setPlayerData("defense_build", 1)
+        setPlayerData("defense_base_step", 0)
+        setPlayerData("defense_cooldown", 10000)
+        setPlayerData("defense_cooldown_step", 0)
+        setPlayerData("luck_base", 0)
+        setPlayerData("luck_base_step", 0)
+        setPlayerData("luck_build", 1)
+        setPlayerData("luck_build_step", 0)
+        setPlayerData("luck_cooldown", 10000)
+        setPlayerData("luck_cooldown_step", 0)
+        setPlayerData("meat_count", 0)
+        setPlayerData("upgrade_points", 5)
+        setPlayerData("phase", 1)
+        setPlayerData("round", 1)
+    }
 }
 
 export const getPlayerStats = () => {
@@ -71,108 +73,103 @@ export const upgradePlayerStat = (onUpdate?: (
     value: number
 ) => void) => {
     const [player_data, setPlayerData] = usePlayerBucket()
-    if (player_data === undefined) return (_: string) => { };
 
     return (stat: string) => {
-        if (player_data.upgrade_points === 0) return;
-
-        const setStat = (stat: string, value: number) => setPlayerData((set: PlayerBucketData) => {
-            return { ...set, [stat]: value }
-        })
+        if (player_data("upgrade_points") === 0) return;
 
         let stat_change;
 
         switch (stat) {
             case "max_health":
-                stat_change = 50 * upgradeAlgo(player_data.max_health_step)
-                setStat("max_health", player_data.max_health + stat_change)
-                setStat("current_health", player_data.current_health + stat_change)
-                setStat("max_health_step", player_data.max_health_step + 1)
+                stat_change = 50 * upgradeAlgo(player_data("max_health_step"))
+                setPlayerData("max_health", player_data("max_health") + stat_change)
+                setPlayerData("current_health", player_data("current_health") + stat_change)
+                setPlayerData("max_health_step", player_data("max_health_step") + 1)
                 if (onUpdate) {
-                    onUpdate("max_health", player_data.max_health + stat_change);
-                    onUpdate("current_health", player_data.current_health + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("max_health", player_data("max_health") );
+                    onUpdate("current_health", player_data("current_health") );
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "attack_damage":
-                stat_change = 5 * upgradeAlgo(player_data.attack_damage_step)
-                setStat("attack_damage", player_data.attack_damage + stat_change)
-                setStat("attack_damage_step", player_data.attack_damage_step + 1)
+                stat_change = 5 * upgradeAlgo(player_data("attack_damage_step"))
+                setPlayerData("attack_damage", player_data("attack_damage") + stat_change)
+                setPlayerData("attack_damage_step", player_data("attack_damage_step") + 1)
                 if (onUpdate) {
-                    onUpdate("attack_damage", player_data.attack_damage + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("attack_damage", player_data("attack_damage") );
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "attack_cooldown":
-                stat_change = 150 * upgradeAlgo(player_data.attack_cooldown_step)
+                stat_change = 150 * upgradeAlgo(player_data("attack_cooldown_step"))
                 if (stat_change < 150) return;
-                setStat("attack_cooldown", player_data.attack_cooldown - stat_change)
-                setStat("attack_cooldown_step", player_data.attack_cooldown_step + 1)
+                setPlayerData("attack_cooldown", player_data("attack_cooldown") - stat_change)
+                setPlayerData("attack_cooldown_step", player_data("attack_cooldown_step") + 1)
                 if (onUpdate) {
-                    onUpdate("attack_cooldown", player_data.attack_cooldown - stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("attack_cooldown", player_data("attack_cooldown"));
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "defense_base":
-                stat_change = 5 * upgradeAlgo(player_data.defense_base_step)
+                stat_change = 5 * upgradeAlgo(player_data("defense_base_step"))
 
-                setStat("defense_base", player_data.defense_base + stat_change)
-                setStat("defense_base_step", player_data.defense_base_step + 1)
+                setPlayerData("defense_base", player_data("defense_base") + stat_change)
+                setPlayerData("defense_base_step", player_data("defense_base_step") + 1)
                 if (onUpdate) {
-                    onUpdate("defense_base", player_data.defense_base + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("defense_base", player_data("defense_base") );
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "defense_build":
-                stat_change = 1 * upgradeAlgo(player_data.defense_build_step)
-                setStat("defense_build", player_data.defense_build + stat_change)
-                setStat("defense_build_step", player_data.defense_build_step + 1)
+                stat_change = 1 * upgradeAlgo(player_data("defense_build_step"))
+                setPlayerData("defense_build", player_data("defense_build") + stat_change)
+                setPlayerData("defense_build_step", player_data("defense_build_step") + 1)
                 if (onUpdate) {
-                    onUpdate("defense_build", player_data.defense_build + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("defense_build", player_data("defense_build") );
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "defense_cooldown":
-                stat_change = 150 * upgradeAlgo(player_data.defense_cooldown_step)
+                stat_change = 150 * upgradeAlgo(player_data("defense_cooldown_step"))
                 if (stat_change < 150) return;
-                setStat("defense_cooldown", player_data.defense_cooldown - stat_change)
-                setStat("defense_cooldown_step", player_data.defense_cooldown_step + 1)
+                setPlayerData("defense_cooldown", player_data("defense_cooldown") - stat_change)
+                setPlayerData("defense_cooldown_step", player_data("defense_cooldown_step") + 1)
                 if (onUpdate) {
-                    onUpdate("defense_cooldown", player_data.defense_cooldown - stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("defense_cooldown", player_data("defense_cooldown"));
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "luck_base":
-                stat_change = 5 * upgradeAlgo(player_data.luck_base_step)
-                setStat("luck_base", player_data.luck_base + stat_change)
-                setStat("luck_base_step", player_data.luck_base_step + 1)
+                stat_change = 5 * upgradeAlgo(player_data("luck_base_step"))
+                setPlayerData("luck_base", player_data("luck_base") + stat_change)
+                setPlayerData("luck_base_step", player_data("luck_base_step") + 1)
                 if (onUpdate) {
-                    onUpdate("luck_base", player_data.luck_base + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("luck_base", player_data("luck_base") );
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "luck_build":
-                stat_change = 1 * upgradeAlgo(player_data.luck_build_step)
-                setStat("luck_build", player_data.luck_build + stat_change)
-                setStat("luck_build_step", player_data.luck_build_step + 1)
+                stat_change = 1 * upgradeAlgo(player_data("luck_build_step"))
+                setPlayerData("luck_build", player_data("luck_build") + stat_change)
+                setPlayerData("luck_build_step", player_data("luck_build_step") + 1)
                 if (onUpdate) {
-                    onUpdate("luck_build", player_data.luck_build + stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("luck_build", player_data("luck_build"));
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
             case "luck_cooldown":
-                stat_change = 150 * upgradeAlgo(player_data.luck_cooldown_step)
+                stat_change = 150 * upgradeAlgo(player_data("luck_cooldown_step"))
                 if (stat_change < 150) return;
-                setStat("luck_cooldown", player_data.luck_cooldown - stat_change)
-                setStat("luck_cooldown_step", player_data.luck_cooldown_step + 1)
+                setPlayerData("luck_cooldown", player_data("luck_cooldown") - stat_change)
+                setPlayerData("luck_cooldown_step", player_data("luck_cooldown_step") + 1)
                 if (onUpdate) {
-                    onUpdate("luck_cooldown", player_data.luck_cooldown - stat_change);
-                    onUpdate("upgrade_points", player_data.upgrade_points - 1);
+                    onUpdate("luck_cooldown", player_data("luck_cooldown"));
+                    onUpdate("upgrade_points", player_data("upgrade_points") - 1);
                 }
                 break
         }
 
-        setStat("upgrade_points", player_data.upgrade_points - 1)
+        setPlayerData("upgrade_points", player_data("upgrade_points") - 1)
 
     }
 
@@ -180,19 +177,14 @@ export const upgradePlayerStat = (onUpdate?: (
 
 export const useHealPlayer = () => {
     const [player_data, setPlayerData] = usePlayerBucket()
-    if (player_data === undefined) return (_: number) => { };
-
-    const setStat = (stat: string, value: number) => setPlayerData((set: PlayerBucketData) => {
-        return { ...set, [stat]: value }
-    })
 
     return (amount: number) => {
-        const new_current = amount + player_data.current_health
+        const new_current = amount + player_data("current_health")
 
-        if (new_current >= player_data.current_health) {
-            setStat("current_health", player_data.max_health)
+        if (new_current >= player_data("current_health")) {
+            setPlayerData("current_health", player_data("max_health"))
         } else {
-            setStat("current_health", new_current)
+            setPlayerData("current_health", new_current)
 
         }
     }
@@ -201,28 +193,23 @@ export const useHealPlayer = () => {
 
 export const usePlayerRounds = () => {
     const [player_data, setPlayerData] = usePlayerBucket()
-    if (player_data === undefined) return (_: number, __: number) => { }
 
     const max_rounds = 5
-    const max_phase = 3
-
-    const setStat = (stat: string, value: number) => setPlayerData((set: PlayerBucketData) => {
-        return { ...set, [stat]: value }
-    })
 
     return (meat: number, points: number, current_health: number) => {
         const current_phase =
-           player_data.phase < max_phase && player_data.round === max_rounds ?
-                player_data.phase + 1 :
-                player_data.phase
+            player_data("round") === max_rounds ?
+                player_data("phase") + 1 :
+                player_data("phase")
         const current_round =
-            player_data.round < max_rounds ?
-                player_data.round + 1 :
-                0
-        setStat("phase", current_phase)
-        setStat("round", current_round)
-        setStat("current_health", current_health)
-        setStat("meat_count", player_data.meat_count + meat)
-        setStat("upgrade_points", player_data.upgrade_points + points)
+            player_data("round") < max_rounds ?
+                player_data("round") + 1 :
+                1
+
+        setPlayerData("phase", current_phase)
+        setPlayerData("round", current_round)
+        setPlayerData("current_health", current_health)
+        setPlayerData("meat_count", player_data("meat_count") + meat)
+        setPlayerData("upgrade_points", player_data("upgrade_points") + points)
     }
 }

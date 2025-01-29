@@ -9,7 +9,7 @@ export const End: EndPage = () => {
     const initPlayer = useInitPlayerStats()
     const PlayerData = getPlayerStats()
 
-    const message = (PlayerData && PlayerData?.phase > 3)? 
+    const message = (PlayerData && PlayerData("phase") > 3)? 
         "Congrats! You Made it to the End!":
         "You have encountered an unforunate fate..."
 

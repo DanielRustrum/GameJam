@@ -7,7 +7,7 @@ import { memo } from "react"
 export const EnemySprite = memo(() => {
     const PlayerData = getPlayerStats()
 
-    switch(PlayerData?.phase?? 4) {
+    switch(PlayerData("phase")) {
         case 1:
             return <img src={red_dragon} />
         case 2:

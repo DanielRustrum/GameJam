@@ -1,34 +1,26 @@
-import { useEffect, useState } from "react"
+// import { useEffect, useRef, useState } from "react"
 
-type useLocalStorageBucket = <BucketType = unknown>(
-    bucket_name: string
+type useLocalStorageBucket = <Casted = unknown>(
+    bucket_name: string,
+    CastFunc?: CallableFunction
 ) => [
-    BucketType | undefined,
-    (set: BucketType | ((set: BucketType) => BucketType) ) => void
+    (key: string) => Casted,
+    (key: string, set: Casted) => void
 ]
 
 export const useLocalStorageBucket:useLocalStorageBucket = 
     ( 
-        bucket_name
+        bucket_name,
+        CastFunc?
     ) => {
-    const [bucket_data, setBucket] = useState(() => {
-        const local_store = localStorage.getItem(bucket_name)
-        
-         if(local_store === null) 
-            return undefined;
-        
-        return JSON.parse(local_store)
-    })
-
-    useEffect(() => {
-        localStorage.setItem(bucket_name, JSON.stringify(bucket_data))
-    }, [bucket_data])
-
     return [
-        bucket_data,
-        (set: any) => {
-            setBucket(set)
-        }
+        (key) => {
+            if(CastFunc !== undefined)
+                return CastFunc(localStorage.getItem(`${bucket_name}.${key}`));
+            else
+                return localStorage.getItem(`${bucket_name}.${key}`);
+        },
+        (key, set) => localStorage.setItem(`${bucket_name}.${key}`, JSON.stringify(set))
     ]
 }
 

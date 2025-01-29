@@ -1,15 +1,13 @@
 import { FC, memo, useMemo, useRef } from "react"
-import { PlayerBucketData } from "./stats"
 import { useCountDownBar } from "../components/Field/CountDownBar"
 import { useStatBar } from "../components/Field/StatBar"
 import { useShieldButton } from "../components/Field/ShieldButton"
 import { useFocusButton } from "../components/Field/FocusButton"
-import { EnemyBucketData } from "./enemy"
+import { getPlayerStats } from "./stats"
+import { getEnemyStats } from "./enemy"
 
 
 type setupBattleFieldFunction = (
-    PlayerStats: PlayerBucketData,
-    EnemyStats: EnemyBucketData,
     onBattleEnd?: (victor: "Player" | "Opponent", health: number) => void
 ) => [
     FC<{}>,
@@ -24,26 +22,46 @@ type setupBattleFieldFunction = (
 
 const isCrit = (stat: number) => {
     const chance = Math.random() * 100
-    return stat >= 1 || chance < stat
+    return stat >= 100 || chance < stat
 
 }
 
 export const setupBattleField: setupBattleFieldFunction = (
-    PlayerStats,
-    EnemyStats, 
     onBattleEnd=()=>{}
 ) => {
+    const PlayerData = getPlayerStats()
+    const EnemyData = getEnemyStats()
 
     const battlefieldDataRef = useRef({
-        player_defense_stack: PlayerStats.defense_base,
-        enemy_defense_stack: EnemyStats.defense_base,
-        player_luck_stack: PlayerStats.luck_base,
-        enemy_luck_stack: EnemyStats.luck_base,
-        player_current_health: PlayerStats.current_health,
+        player_defense_stack: PlayerData("defense_base"),
+        enemy_defense_stack: EnemyData("defense_base"),
+        player_luck_stack: PlayerData("luck_base"),
+        enemy_luck_stack: EnemyData("luck_base"),
+        player_current_health: PlayerData("current_health"),
         has_ended: false
     })
 
-    console.log(battlefieldDataRef.current)
+    const endRoundWin = (current_health: number) => {
+        if(current_health < 1) {
+            freezePlayer(Infinity)
+            freezeEnemy(Infinity)
+            if(!battlefieldDataRef.current.has_ended) {
+                onBattleEnd("Player", battlefieldDataRef.current.player_current_health)
+                battlefieldDataRef.current.has_ended = true
+            }
+        }
+    }
+
+    const endGameLose = () => {
+        if(battlefieldDataRef.current.player_current_health < 1) {
+            freezePlayer(Infinity)
+            freezeEnemy(Infinity)
+            if(!battlefieldDataRef.current.has_ended){
+                onBattleEnd("Opponent", 0)
+                battlefieldDataRef.current.has_ended = true
+            }
+        }
+    }
 
     //* Player Stat Bars
     const [AttackBar, {
@@ -51,19 +69,18 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeAttack,
         adjustRate: adjustAttack,
         startCountdown: startPlayerAttack
-    }] = useCountDownBar("Attack", PlayerStats.attack_cooldown, () => {
-        const damage_calc = PlayerStats.attack_damage - battlefieldDataRef.current.enemy_defense_stack
+    }] = useCountDownBar("Attack", PlayerData("attack_cooldown"), () => {
+        const damage_calc = PlayerData("attack_damage") - battlefieldDataRef.current.enemy_defense_stack
         const actual_damage = damage_calc < 0? 0: damage_calc
 
-        console.log(actual_damage, battlefieldDataRef.current)
 
         const critted = isCrit(battlefieldDataRef.current.player_luck_stack)
         const mult = critted? 1.2: 1
         damageEnemy(actual_damage * mult)
-        battlefieldDataRef.current.enemy_defense_stack = EnemyStats.defense_base
+        battlefieldDataRef.current.enemy_defense_stack = EnemyData("defense_base")
         
         if(critted)
-            battlefieldDataRef.current.player_luck_stack = PlayerStats.luck_base;
+            battlefieldDataRef.current.player_luck_stack = PlayerData("luck_base");
 
     })
     const [DefenseBar, {
@@ -71,21 +88,21 @@ export const setupBattleField: setupBattleFieldFunction = (
         unfreezeBar: unfreezeDefense,
         adjustRate: adjustDefense,
         startCountdown: startPlayerDefense
-    }] = useCountDownBar("Defense", PlayerStats.defense_cooldown, () => {
+    }] = useCountDownBar("Defense", PlayerData("defense_cooldown"), () => {
         const critted = isCrit(battlefieldDataRef.current.player_luck_stack)
         const mult = critted? 1.2: 1
 
-        battlefieldDataRef.current.player_defense_stack += PlayerStats.defense_build * mult
+        battlefieldDataRef.current.player_defense_stack += PlayerData("defense_build") * mult
         if(critted)
-            battlefieldDataRef.current.player_luck_stack = PlayerStats.luck_base;
+            battlefieldDataRef.current.player_luck_stack = PlayerData("luck_base");
     })
     const [LuckBar, {
         freezeBar: freezeLuck,
         unfreezeBar: unfreezeLuck,
         adjustRate: adjustLuck,
         startCountdown: startPlayerLuck
-    }] = useCountDownBar("Luck", PlayerStats.luck_cooldown, () => {
-        battlefieldDataRef.current.player_luck_stack += PlayerStats.luck_build
+    }] = useCountDownBar("Luck", PlayerData("luck_cooldown"), () => {
+        battlefieldDataRef.current.player_luck_stack += PlayerData("luck_build")
     })
     
     const [
@@ -132,18 +149,10 @@ export const setupBattleField: setupBattleFieldFunction = (
         reduceValue: damagePlayer
     }] = useStatBar(
         "Player Health",
-        PlayerStats.current_health,
-        PlayerStats.max_health,
+        PlayerData("current_health"),
+        PlayerData("max_health"),
         (_) => {
-            if(battlefieldDataRef.current.player_current_health < 1) {
-                freezePlayer(Infinity)
-                freezeEnemy(Infinity)
-                if(!battlefieldDataRef.current.has_ended){
-                    onBattleEnd("Opponent", 0)
-                    battlefieldDataRef.current.has_ended = true
-                }
-
-            }
+            endGameLose()
         }
     )
 
@@ -154,72 +163,62 @@ export const setupBattleField: setupBattleFieldFunction = (
         freezeBar:freezeEnemyAttack,
         unfreezeBar: unfreezeEnemyAttack,
         startCountdown: startEnemyAttack
-    }] = useCountDownBar("Attack", EnemyStats.attack_cooldown, () => {
-        const damage_calc = EnemyStats.attack_damage - battlefieldDataRef.current.player_defense_stack
+    }] = useCountDownBar("Attack", EnemyData("attack_cooldown"), () => {
+        const damage_calc = EnemyData("attack_damage") - battlefieldDataRef.current.player_defense_stack
         const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
         const actual_damage = damage_calc < 0? 0: damage_calc
         const mult = critted? 1.2: 1
 
-        console.log(
-            EnemyStats.attack_damage - battlefieldDataRef.current.player_defense_stack
-            ,battlefieldDataRef.current.player_defense_stack
-        )
+        
 
         damagePlayer(actual_damage * mult)
         battlefieldDataRef.current.player_current_health = 
             battlefieldDataRef.current.player_current_health - 
             (actual_damage * mult)
-        battlefieldDataRef.current.player_defense_stack = PlayerStats.defense_base
+        battlefieldDataRef.current.player_defense_stack = PlayerData("defense_base")
 
 
         if(critted)
-            battlefieldDataRef.current.enemy_luck_stack = EnemyStats.luck_base;
+            battlefieldDataRef.current.enemy_luck_stack = EnemyData("luck_base");
     })
     const [EnemyFreezeBar, {
         freezeBar:freezeEnemyFreeze,
         unfreezeBar: unfreezeEnemyFreeze,
         startCountdown: startEnemyFreeze
-    }] = useCountDownBar("Freeze", EnemyStats.freeze_cooldown, () => {
+    }] = useCountDownBar("Freeze", EnemyData("freeze_cooldown"), () => {
             if(!getIsActive())
-                freezePlayer(EnemyStats.freeze_duration);
+                freezePlayer(EnemyData("freeze_duration"));
         })
     const [EnemyDefenseBar, {
         freezeBar:freezeEnemyDefense,
         unfreezeBar: unfreezeEnemyDefense,
         startCountdown: startEnemyDefense
-    }] = useCountDownBar("Defense", EnemyStats.defense_cooldown, () => () => {
+    }] = useCountDownBar("Defense", EnemyData("defense_cooldown"), () => () => {
         const critted = isCrit(battlefieldDataRef.current.enemy_luck_stack)
         const mult = critted? 1.2: 1
 
-        battlefieldDataRef.current.enemy_defense_stack += EnemyStats.defense_build * mult
+        battlefieldDataRef.current.enemy_defense_stack += EnemyData("defense_build") * mult
 
         if(critted)
-            battlefieldDataRef.current.enemy_luck_stack = EnemyStats.luck_base;
+            battlefieldDataRef.current.enemy_luck_stack = EnemyData("luck_base");
     })
     const [EnemyLuckBar, {
         freezeBar:freezeEnemyLuck,
         unfreezeBar: unfreezeEnemyLuck,
         startCountdown: startEnemyLuck
-    }] = useCountDownBar("Luck", EnemyStats.luck_cooldown, () => {
-        battlefieldDataRef.current.enemy_luck_stack += EnemyStats.luck_build
+    }] = useCountDownBar("Luck", EnemyData("luck_cooldown"), () => {
+        battlefieldDataRef.current.enemy_luck_stack += EnemyData("luck_build")
     })
 
     const[EnemyHealthBar, {
         reduceValue: damageEnemy
     }] = useStatBar(
         "Enemy Health",
-        PlayerStats.max_health,
-        PlayerStats.max_health,
+        PlayerData("max_health"),
+        PlayerData("max_health"),
         (current_health) => {
             console.log(current_health)
-            if(current_health < 1) {
-                freezePlayer(Infinity)
-                freezeEnemy(Infinity)
-                if(!battlefieldDataRef.current.has_ended) {
-                    onBattleEnd("Player", battlefieldDataRef.current.player_current_health)
-                    battlefieldDataRef.current.has_ended = true
-                }
-            }
+            endRoundWin(current_health)
         }
     )
 

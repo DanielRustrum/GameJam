@@ -1,5 +1,5 @@
 import {FC} from 'react'
-import { generateEnemy, useSetNextEnemy } from '../services/enemy'
+import { generateEnemy } from '../services/enemy'
 import { useNavigate } from 'react-router-dom'
 import { getPlayerStats } from '../services/stats'
 
@@ -7,7 +7,6 @@ type ExplorePage = FC<{}>
 
 export const Explore: ExplorePage = () => {
     const genEnemy = generateEnemy()
-    const selectEnemy = useSetNextEnemy()
     const navigate = useNavigate()
     const PlayerData = getPlayerStats()
 
@@ -20,7 +19,7 @@ export const Explore: ExplorePage = () => {
             <div className='flex space-between gap-25px'>
                 <button
                     className='ui--container text-bold fill-width'
-                    disabled={PlayerData && PlayerData.round === 5}
+                    disabled={PlayerData && PlayerData("round") === 5}
                     onClick={() => navigate("/town")}
                 >
                     Go to Town <br/>
@@ -28,9 +27,9 @@ export const Explore: ExplorePage = () => {
                 </button>
                 <button
                     className='ui--container text-bold fill-width'
-                    disabled={PlayerData && PlayerData.round === 5}
+                    disabled={PlayerData && PlayerData("round") === 5}
                     onClick={() => {
-                        selectEnemy(genEnemy(false))
+                        genEnemy(false)
                         navigate("/field")
                     }}
                 >
@@ -39,7 +38,7 @@ export const Explore: ExplorePage = () => {
                 <button
                     className='ui--container text-bold fill-width'
                     onClick={() => {
-                        (genEnemy(true))
+                        genEnemy(true)
                         navigate("/field")
                     }}
                 >

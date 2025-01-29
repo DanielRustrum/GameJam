@@ -6,18 +6,17 @@ type StrongholdPage = FC<{}>
 
 export const Stronghold: StrongholdPage = () => {
     const PlayerData = getPlayerStats()
-    if(PlayerData === undefined) return <></>;
     
-    let [upgrade_points, setUpgradePoints] = useState(PlayerData.upgrade_points)
-    let [max_health, setMaxHealth] = useState(PlayerData.max_health)
-    let [attack_damage, setAttackDamage] = useState(PlayerData.attack_damage)
-    let [attack_cooldown, setAttackCooldown] = useState(PlayerData.attack_cooldown)
-    let [defense_base, setDefenseBase] = useState(PlayerData.defense_base)
-    let [defense_build, setDefenseBuild] = useState(PlayerData.defense_build)
-    let [defense_cooldown, setDefenseCooldown] = useState(PlayerData.defense_cooldown)
-    let [luck_base, setLuckBase] = useState(PlayerData.luck_base)
-    let [luck_build, setLuckBuild] = useState(PlayerData.luck_build)
-    let [luck_cooldown, setLuckCooldown] = useState(PlayerData.luck_cooldown)
+    let [upgrade_points, setUpgradePoints] = useState(PlayerData("upgrade_points"))
+    let [max_health, setMaxHealth] = useState(PlayerData("max_health"))
+    let [attack_damage, setAttackDamage] = useState(PlayerData("attack_damage"))
+    let [attack_cooldown, setAttackCooldown] = useState(PlayerData("attack_cooldown"))
+    let [defense_base, setDefenseBase] = useState(PlayerData("defense_base"))
+    let [defense_build, setDefenseBuild] = useState(PlayerData("defense_build"))
+    let [defense_cooldown, setDefenseCooldown] = useState(PlayerData("defense_cooldown"))
+    let [luck_base, setLuckBase] = useState(PlayerData("luck_base"))
+    let [luck_build, setLuckBuild] = useState(PlayerData("luck_build"))
+    let [luck_cooldown, setLuckCooldown] = useState(PlayerData("luck_cooldown"))
 
     const StatMap:{[key: string]: (set: number) => void} = {
         "upgrade_points": setUpgradePoints,
@@ -47,7 +46,9 @@ export const Stronghold: StrongholdPage = () => {
                 <button 
                     className='bg-color-none border-round-4px text-bold'
                     onClick={onClick}
-                >Upgrade</button>
+                >
+                    Upgrade
+                </button>
             </div>
         )
     
@@ -57,7 +58,7 @@ export const Stronghold: StrongholdPage = () => {
                 <h1 className='text-centered'>Stronghold</h1>
                 <p className='text-centered'>Available Stat Points: {upgrade_points}</p>
             </div>
-            <div className='flex space-between span-width-50 gap-10px'>
+            <div className='flex space-between full-width gap-10px'>
                 <div className='ui--container fill-width'>
                     <h2 className='text-centered'>Offense</h2>
                     <TempUpgrade 

@@ -1,4 +1,4 @@
-import { FC, memo, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { FC, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { ProgressBar } from "./ProgressBar"
 
 type StatBarComponent = FC<{}>
@@ -31,7 +31,6 @@ export const useStatBar: useStatBarHook = (
             BarRef.current.setStat(
                 (current_stat: number) =>{ 
                     const updated_stat = current_stat - amount
-                    onUpdate(current_stat)
                     return updated_stat
                 }
             );
@@ -42,7 +41,6 @@ export const useStatBar: useStatBarHook = (
             BarRef.current.setStat(
                 (current_stat: number) =>{ 
                     const updated_stat = current_stat + amount
-                    onUpdate(current_stat)
                     return updated_stat
                 }
             );
@@ -55,6 +53,10 @@ export const useStatBar: useStatBarHook = (
         useImperativeHandle(BarRef, () => ({
             setStat
         }))
+
+        useEffect(() => {
+            onUpdate(stat)
+        }, [stat])
         
         return <ProgressBar
             backgroundColor="#96312e"
