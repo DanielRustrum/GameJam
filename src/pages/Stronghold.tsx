@@ -41,24 +41,28 @@ export const Stronghold: StrongholdPage = () => {
     const TempUpgrade: 
         FC<{name: string, stat: number, onClick: () => void}> = 
         ({name, stat, onClick}) => (
-            <div className='flex space-between pad-vert-10px'>
-                <p className='text-bold'>{name}: {stat}</p>
-                <button 
-                    className='bg-color-none border-round-4px text-bold'
-                    onClick={onClick}
+            <>
+                <div 
+                    className='flex space-between pad-vert-10px ui--stack v-centered'
                 >
-                    Upgrade
-                </button>
-            </div>
+                    <p className='text-bold ui--centered-text'>{name}: {stat}</p>
+                    <button 
+                        className='bg-color-none border-round-4px text-bold'
+                        onClick={onClick}
+                    >
+                        Upgrade
+                    </button>
+                </div>
+            </>
         )
     
     return (
-        <div className='flex columns v-centered h-centered full-height gap-25px span-width-50 mar-auto'>
+        <div className='ui--span-page flex columns v-centered h-centered full-height gap-25px span-width-50 mar-auto'>
             <div className='ui--container full-width'>
                 <h1 className='text-centered'>Stronghold</h1>
                 <p className='text-centered'>Available Stat Points: {upgrade_points}</p>
             </div>
-            <div className='flex space-between full-width gap-10px'>
+            <div className='flex space-between full-width ui--gap'>
                 <div className='ui--container fill-width'>
                     <h2 className='text-centered'>Offense</h2>
                     <TempUpgrade 

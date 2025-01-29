@@ -13,6 +13,7 @@ type useStatBarHook = (
     {
         reduceValue: (amount: number) => void
         increaseValue: (amount: number) => void
+        setBar: (amount: number) => void
     }
 ]
 
@@ -23,7 +24,7 @@ export const useStatBar: useStatBarHook = (
     onUpdate = () => {}
 ) => {
     const BarRef = useRef<{
-        setStat?: (set: (new_stat: number) => number) => void
+        setStat?: (set: ((new_stat: number) => number) | number) => void
     }>({})
     
     const reduceValue = (amount: number) => {
@@ -44,6 +45,11 @@ export const useStatBar: useStatBarHook = (
                     return updated_stat
                 }
             );
+    } 
+
+    const setBar = (amount: number) => {
+        if(BarRef.current.setStat)
+            BarRef.current.setStat(amount);
     } 
 
 
@@ -68,7 +74,7 @@ export const useStatBar: useStatBarHook = (
     }
 
     const actions = useMemo(
-        () => ({ reduceValue, increaseValue }),
+        () => ({ reduceValue, increaseValue, setBar }),
         [],
     );
 

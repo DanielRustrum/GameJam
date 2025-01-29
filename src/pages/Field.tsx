@@ -44,8 +44,8 @@ export const Field: StagePage = () => {
             >
                 <div
                     className='
-                        ui--container flex columns space-between v-centered 
-                        span-width-30 mar-auto span-height-20
+                        ui--container flex columns space-between v-centered ui--pad
+                        span-width-50 mar-auto span-height-30
                     '
                 >
                     <div>
@@ -53,7 +53,7 @@ export const Field: StagePage = () => {
                         <h3 className='text-centered'>Phase {PlayerData("phase")}</h3>
                     </div>
                     <button 
-                        className='full-width pad-15px bg-color-none border-round-4px text-bold'
+                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
                         onClick={() => {
                             startBattle()
                             startDialog.current?.close()
@@ -66,7 +66,10 @@ export const Field: StagePage = () => {
                 ref={endDialog}
             >
                 <div
-                    className='ui--container flex columns space-between span-width-30 mar-auto span-height-40'
+                    className='
+                        ui--container flex columns space-between v-centered ui--pad
+                        span-width-30 mar-auto span-height-30 ui--mobile-full-width
+                    '
                 >
                     <div>
                         <h2 className='text-centered pad-bottom-25px'>You have Defeated the Dragon!</h2>
@@ -88,20 +91,12 @@ export const Field: StagePage = () => {
                     </button>
                 </div>
             </dialog>
-            <div id="game--ui" className='flex full-height space-between v-end pad-10px'>
+            <div id="game--ui" className='flex full-height ui--stack space-between v-end pad-10px'>
                 <PlayerUI />
                 <EnemyUI />
             </div>
             <div 
-                className="mar-auto flex v-centered space-between span-width-100 pad-25px" 
-                style={{
-                    zIndex: "-1",
-                    position: 'fixed',
-                    top: "0px",
-                    left: "0px",
-                    right: "0px",
-                    bottom: "10vh"
-                }}
+                className="sprite--entities mar-auto flex v-centered space-between span-width-100 pad-25px" 
             >
                 <p>Player Goes Here</p>
                 <EnemySprite />

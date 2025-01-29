@@ -1,5 +1,6 @@
 @use "./styles/reset.scss";
 @use "./styles/micro.scss";
+@use "./styles/device.scss" as device;
 
 body { 
     background-color: #80acaa;
@@ -13,6 +14,15 @@ body {
     border: 5px solid var(--ui--border-color);
     padding: 40px;
     border-radius: 15px;
+
+    @include device.on-desktop {
+        padding: 40px;
+
+    }
+
+    @include device.not-on-desktop {
+        padding: 5px;
+    }
 }
 
 .ui--container:disabled {
@@ -21,10 +31,98 @@ body {
     
 }
 
+.ui--pad {
+    @include device.on-desktop {
+        padding: 30px;
+
+    }
+
+    @include device.not-on-desktop {
+        padding: 10px;
+    }
+}
+
+.ui--gap {
+    @include device.on-desktop {
+        gap: 25px;
+    }
+
+    @include device.not-on-desktop {
+        gap: 5px;
+    }
+}
+
+.ui--span-page {
+    @include device.on-desktop {
+        width: 75vw;
+    }
+
+    @include device.not-on-desktop {
+        width: 95vw;
+    }
+
+}
+
+.ui--centered-text {
+    @include device.on-desktop {
+        text-align: left;
+    }
+
+    @include device.not-on-desktop {
+        text-align: center;
+    }
+}
+
+.ui--stack {
+    @include device.on-desktop {
+        flex-direction: row;
+    }
+
+    @include device.not-on-desktop {
+        flex-direction: column;
+    }
+
+}
+
+.ui--button {
+    @include device.on-desktop {
+        max-width: fit-content;
+    }
+}
+
+.ui--mobile-full-width {
+    @include device.not-on-desktop {
+        width: 100%;
+    }
+}
+
+.ui--shield-button-mobile {
+    @include device.not-on-desktop {
+        height: 20vw;
+    }
+}
+
 dialog {
     background-color: inherit;
     border: 0px;
 }
 dialog::backdrop {
     background-color: #80acaa50;
+}
+
+.sprite--entities {
+    z-index: -1;
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+
+    @include device.on-desktop {
+        bottom: 40vh;
+
+    }
+
+    @include device.not-on-desktop {
+        bottom: 20vh;
+    }
 }

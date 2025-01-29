@@ -46,6 +46,7 @@ export const setupBattleField: setupBattleFieldFunction = (
             freezePlayer(Infinity)
             freezeEnemy(Infinity)
             if(!battlefieldDataRef.current.has_ended) {
+                setEnemyHealthBar(0)
                 onBattleEnd("Player", battlefieldDataRef.current.player_current_health)
                 battlefieldDataRef.current.has_ended = true
             }
@@ -127,13 +128,13 @@ export const setupBattleField: setupBattleFieldFunction = (
                 break
             case "Defense":
                 adjustAttack(1)
-                adjustDefense(1.2)
+                adjustDefense(1.5)
                 adjustLuck(1)
                 break
             case "Luck":
                 adjustAttack(1)
                 adjustDefense(1)
-                adjustLuck(1.2)
+                adjustLuck(1.8)
                 break
             default:
                 adjustAttack(1)
@@ -211,7 +212,8 @@ export const setupBattleField: setupBattleFieldFunction = (
     })
 
     const[EnemyHealthBar, {
-        reduceValue: damageEnemy
+        reduceValue: damageEnemy,
+        setBar: setEnemyHealthBar
     }] = useStatBar(
         "Enemy Health",
         PlayerData("max_health"),
@@ -265,18 +267,18 @@ export const setupBattleField: setupBattleFieldFunction = (
     // * Battle Field UI
     const PlayerUI = () => {
         return (
-            <div className="flex gap-25px">
-                <div className="ui--container flex columns gap-10px">
+            <div className="flex ui--mobile-full-width ui--stack ui--gap">
+                <div className="ui--container fill-width flex columns gap-10px">
                     <PlayerHealthBar />
-                    <div className="flex gap-15px">
+                    <div className="flex gap-15px ui--mobile-full-width span-width-30 ui--stack">
                         <AttackBar />
                         <AttackFocusButton />
                     </div>
-                    <div className="flex gap-15px">
+                    <div className="flex gap-15px space-between ui--stack">
                         <DefenseBar />
                         <DefenseFocusButton />
                     </div>
-                    <div className="flex gap-15px">
+                    <div className="flex gap-15px ui--stack">
                         <LuckBar />
                         <LuckFocusButton />
                     </div>
@@ -288,7 +290,7 @@ export const setupBattleField: setupBattleFieldFunction = (
 
     const EnemyUI = () => {
         return (
-            <div className="ui--container flex columns gap-10px">
+            <div className="ui--container ui--mobile-full-width flex columns gap-10px span-width-30">
                 <EnemyHealthBar />
                 <EnemyAttackBar />
                 <EnemyFreezeBar />

@@ -40,7 +40,7 @@ export const useShieldButton = (
         }, [disabled_time_remaining])
 
         return <button
-            className="ui--container" 
+            className="ui--container ui--shield-button-mobile" 
             disabled={is_disabled}
             onClick={() => {
                 setIsDisabled(true)

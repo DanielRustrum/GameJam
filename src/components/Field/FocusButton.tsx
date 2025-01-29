@@ -50,7 +50,7 @@ export const useFocusButton = (
                 setIsDisabled(set)
             }
             return <button 
-                className="bg-color-none border-round-4px text-bold"
+                className="bg-color-none border-round-4px text-bold fill-width ui--button"
                 disabled={is_disabled}
                 onClick={() => {
                     if(!FocusRef.current.is_disabled) {

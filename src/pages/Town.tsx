@@ -52,13 +52,13 @@ export const Town: TownPage = () => {
 
     if(PlayerData === undefined) return <></>
     return (
-        <div className='mar-auto flex columns v-centered h-centered gap-25px full-height span-width-50'>
-            <div className='ui--container span-width-50'>
+        <div className='mar-auto flex columns v-centered h-centered gap-25px full-height ui--span-page'>
+            <div className='ui--container full-width'>
                 <h1 className='text-centered'>Welcome to Town!</h1>
                 <h2 className='text-centered'>Do you want to trade for anything?</h2>
                 <p className='text-centered pad-top-25px'>Meat Available for Trade: {stock}</p>
             </div>
-            <div className='flex space-between span-width-50 gap-25px'>
+            <div className='flex space-between full-width gap-25px'>
                 <button
                     className='ui--container fill-width text-bold'
                     disabled={stock < 3}

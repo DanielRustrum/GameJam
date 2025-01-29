@@ -11,12 +11,12 @@ export const Explore: ExplorePage = () => {
     const PlayerData = getPlayerStats()
 
     return (
-        <div className='flex columns mar-auto span-width-50 h-centered full-height gap-25px'>
+        <div className='flex columns mar-auto ui--span-page h-centered full-height gap-25px'>
             <div className='ui--container'>
                 <h1 className='text-centered'>Navigation</h1>
                 <h2 className='text-centered'>What do you want to do Next?</h2>
             </div>
-            <div className='flex space-between gap-25px'>
+            <div className='flex space-between ui--gap full-width'>
                 <button
                     className='ui--container text-bold fill-width'
                     disabled={PlayerData && PlayerData("round") === 5}

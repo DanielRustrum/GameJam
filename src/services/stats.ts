@@ -92,7 +92,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "attack_damage":
-                stat_change = 5 * upgradeAlgo(player_data("attack_damage_step"))
+                stat_change = 1 * upgradeAlgo(player_data("attack_damage_step"))
                 setPlayerData("attack_damage", player_data("attack_damage") + stat_change)
                 setPlayerData("attack_damage_step", player_data("attack_damage_step") + 1)
                 if (onUpdate) {
@@ -102,7 +102,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 break
             case "attack_cooldown":
                 stat_change = 150 * upgradeAlgo(player_data("attack_cooldown_step"))
-                if (stat_change < 150) return;
+                if (stat_change < 150 || player_data("attack_cooldown") < 1000) return;
                 setPlayerData("attack_cooldown", player_data("attack_cooldown") - stat_change)
                 setPlayerData("attack_cooldown_step", player_data("attack_cooldown_step") + 1)
                 if (onUpdate) {
@@ -111,7 +111,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "defense_base":
-                stat_change = 5 * upgradeAlgo(player_data("defense_base_step"))
+                stat_change = 1 * upgradeAlgo(player_data("defense_base_step"))
 
                 setPlayerData("defense_base", player_data("defense_base") + stat_change)
                 setPlayerData("defense_base_step", player_data("defense_base_step") + 1)
@@ -131,7 +131,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 break
             case "defense_cooldown":
                 stat_change = 150 * upgradeAlgo(player_data("defense_cooldown_step"))
-                if (stat_change < 150) return;
+                if (stat_change < 150 || player_data("attack_cooldown") < 1000) return;
                 setPlayerData("defense_cooldown", player_data("defense_cooldown") - stat_change)
                 setPlayerData("defense_cooldown_step", player_data("defense_cooldown_step") + 1)
                 if (onUpdate) {
@@ -140,7 +140,8 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "luck_base":
-                stat_change = 5 * upgradeAlgo(player_data("luck_base_step"))
+                stat_change = 1 * upgradeAlgo(player_data("luck_base_step"))
+                if(player_data("luck_base") > 50) return;
                 setPlayerData("luck_base", player_data("luck_base") + stat_change)
                 setPlayerData("luck_base_step", player_data("luck_base_step") + 1)
                 if (onUpdate) {
@@ -159,7 +160,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 break
             case "luck_cooldown":
                 stat_change = 150 * upgradeAlgo(player_data("luck_cooldown_step"))
-                if (stat_change < 150) return;
+                if (stat_change < 150 || player_data("attack_cooldown") < 1000) return;
                 setPlayerData("luck_cooldown", player_data("luck_cooldown") - stat_change)
                 setPlayerData("luck_cooldown_step", player_data("luck_cooldown_step") + 1)
                 if (onUpdate) {

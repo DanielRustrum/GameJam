@@ -48,6 +48,7 @@
 }
 
 .pad-bottom-100px {padding-bottom: 100px;}
+.pad-100px {padding: 100px;}
 
 
 .mar-auto {
@@ -90,6 +91,10 @@ ul.rows {display:inline-block}
 
 .full-width {
     width: 100%;
+}
+
+.min-width-0 {
+    min-width: 0;
 }
 
 .auto-width {

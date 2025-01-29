@@ -7,7 +7,7 @@ export const Tutorial = () => {
 
     return (
         <div className='flex columns margin-auto v-centered pad-25px'>
-            <div className='ui--container span-width-60'>
+            <div className='ui--container ui--span-page'>
                 <h1 className='text-centered'>Learn how to play!</h1>
                 <h2 className='text-centered mar-bottom-25px'>Upgrading you ship</h2>
                 <img 
