@@ -60,7 +60,7 @@ export const Tutorial = () => {
                 <div className='pad-top-25px flex centered'>
                     <button
                         style={{padding: "10px 80px"}}
-                        className='bg-color-none border-round-4px text-bold'
+                        className='ui--button-interact-2 bg-color-none border-round-4px text-bold'
                         onMouseEnter={() => {playClickEnter()}}
                         onClick={() => {
                             playClick()

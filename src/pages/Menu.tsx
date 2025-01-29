@@ -27,23 +27,26 @@ export const Menu: MenuPage = () => {
                 <div className='ui--container flex columns space-between v-centered ui--pad
                         span-width-50 mar-auto span-height-30'>
                     <h2>Do you want to play with sound?</h2>
-                    <button
-                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
-                        onClick={() => {
-                            setVolume(1)
-                            setPermission(true)
-                            playClick()
-                            dialogRef.current?.close()
-                        }}
-                    >Yes!</button>
-                    <button
-                        className='mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
-                        onClick={() => {
-                            setVolume(1)
-                            setPermission(false)
-                            dialogRef.current?.close()
-                        }}
-                    >No</button>
+
+                    <div className='flex columns full-width'>
+                        <button
+                            className='ui--button-interact-2 mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
+                            onClick={() => {
+                                setVolume(1)
+                                setPermission(true)
+                                playClick()
+                                dialogRef.current?.close()
+                            }}
+                        >Yes!</button>
+                        <button
+                            className='ui--button-interact-2 mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
+                            onClick={() => {
+                                setVolume(1)
+                                setPermission(false)
+                                dialogRef.current?.close()
+                            }}
+                        >No</button>
+                    </div>
                 </div>
             </dialog>
             <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
@@ -52,7 +55,7 @@ export const Menu: MenuPage = () => {
                     <button
                         onMouseEnter={() => {playClickEnter()}}
                         style={{padding: "10px 80px"}}
-                        className='ui--container text-bold'
+                        className='ui--button-interact-2 ui--container text-bold'
                         onClick={() => {
                             initPlayer()
                             playClick()
@@ -64,7 +67,7 @@ export const Menu: MenuPage = () => {
                     <button
                         onMouseEnter={() => {playClickEnter()}}
                         style={{padding: "10px 80px"}}
-                        className='ui--container text-bold'
+                        className='ui--button-interact-2 ui--container text-bold'
                         onClick={() => {
                             playClick()
                             navigate("/tutorial")  
@@ -75,7 +78,7 @@ export const Menu: MenuPage = () => {
                     <button
                         onMouseEnter={() => {playClickEnter()}}
                         style={{padding: "10px 80px"}}
-                        className='ui--container text-bold'
+                        className='ui--button-interact-2 ui--container text-bold'
                         onClick={() => {
                             setPermission(!getSetting("sound_permission"))
                             setSoundState(!getSetting("sound_permission"))
