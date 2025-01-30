@@ -6,6 +6,7 @@ import { getEnemyStats } from '../services/enemy';
 import { EnemySprite } from '../components/Field/EnemySprite';
 import { useSoundEffect } from '../hooks/useSoundEffect';
 import { PlayerSprite } from '../components/Field/PlayerSprite';
+import { useMusic } from '../hooks/useBackgroundMusic';
 
 type StagePage = FC<{}>
 
@@ -16,12 +17,16 @@ export const Field: StagePage = () => {
     const nextRound = usePlayerRounds()
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
+    const {set, rate} = useMusic()
+    
 
     const startDialog = useRef<HTMLDialogElement>(null)
     const endDialog = useRef<HTMLDialogElement>(null)
     
 
     useEffect(() => {
+        set(0.4)
+        rate(1)
         startDialog.current?.showModal()
     }, [])
 
@@ -62,6 +67,7 @@ export const Field: StagePage = () => {
                         onClick={() => {
                             startBattle()
                             playClick()
+                            
                             startDialog.current?.close()
                         }}
                     >Start!</button>
@@ -87,7 +93,10 @@ export const Field: StagePage = () => {
                         onMouseEnter={() => {playClickEnter()}}
                         className='ui--button-interact-2 full-width pad-15px bg-color-none border-round-4px text-bold'
                         onClick={() => {
+                            set(0.1)
+                            rate(0.8)
                             playClick()
+                            
                             if(PlayerData("phase") > 3) {
                                 redirect("/end-game")
                             } else {

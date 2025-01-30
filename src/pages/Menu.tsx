@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useInitPlayerStats } from '../services/stats'
 import { setPermission, setVolume, useSoundEffect } from '../hooks/useSoundEffect'
 import { useLocalStorageBucket } from '../hooks/useLocalStorage'
+import { useMusic } from '../hooks/useBackgroundMusic'
 
 type MenuPage = FC<{}>
 
@@ -15,10 +16,16 @@ export const Menu: MenuPage = () => {
     const playClick = useSoundEffect("click")
     const [getSetting, __, checkSetting] = useLocalStorageBucket("settings")
     const [sound_state, setSoundState] = useState(getSetting("sound_permission"))
-    
+    const {trigger, start, set, rate} = useMusic()
+
     useEffect(() => {
-        if(checkSetting("sound_permission"))
+        if(checkSetting("sound_permission")) {
             dialogRef.current?.showModal();
+        } else {
+            trigger()
+            set(0.1)
+            rate(0.8)
+        }
     }, [])
     
     return (
@@ -33,6 +40,7 @@ export const Menu: MenuPage = () => {
                             className='ui--button-interact-2 mar-top-20px full-width pad-15px bg-color-none border-round-4px text-bold'
                             onClick={() => {
                                 setVolume(1)
+                                start()
                                 setPermission(true)
                                 playClick()
                                 dialogRef.current?.close()

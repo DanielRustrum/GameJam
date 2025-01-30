@@ -10,19 +10,31 @@ import { End } from './pages/Gameover';
 import { Town } from './pages/Town';
 import { Explore } from './pages/Explore';
 import { Tutorial } from './pages/Tutorial';
+import { setupBackgroundMusic } from './hooks/useBackgroundMusic';
+
+const Global = () => {
+  const MusicWrapper = setupBackgroundMusic()
+  
+
+  return (
+    <MusicWrapper>
+      <BrowserRouter basename="/GameJam">
+        <Routes>
+          <Route path="/" element={<Menu />} />
+          <Route path="/field" element={<Field />} />
+          <Route path="/upgrade" element={<Stronghold />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/end-game" element={<End />} />
+          <Route path="/town" element={<Town />} />
+          <Route path="/tutorial" element={<Tutorial />} />
+        </Routes>
+      </BrowserRouter>
+    </MusicWrapper>
+  )
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/GameJam">
-      <Routes>
-        <Route path="/" element={<Menu />} />
-        <Route path="/field" element={<Field />} />
-        <Route path="/upgrade" element={<Stronghold />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/end-game" element={<End />} />
-        <Route path="/town" element={<Town />} />
-        <Route path="/tutorial" element={<Tutorial />} />
-      </Routes> 
-    </BrowserRouter>
+    <Global />
   </StrictMode>,
 )
