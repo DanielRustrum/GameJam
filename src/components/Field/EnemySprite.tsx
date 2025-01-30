@@ -1,5 +1,5 @@
 import { getPlayerStats } from "../../services/stats"
-import red_dragon from '../../assets/sprites/Dragon_01_Red_draft.png'
+import red_dragon from '../../assets/sprites/Dragon_02_Red.png'
 import blue_dragon from '../../assets/sprites/Dragon_01_Blue_draft.png'
 import green_dragon from '../../assets/sprites/Dragon_01_Green_draft.png'
 import { memo } from "react"
