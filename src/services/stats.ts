@@ -111,7 +111,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "defense_base":
-                stat_change = 2 * upgradeAlgo(player_data("defense_base_step"))
+                stat_change = 3 * upgradeAlgo(player_data("defense_base_step"))
 
                 setPlayerData("defense_base", player_data("defense_base") + stat_change)
                 setPlayerData("defense_base_step", player_data("defense_base_step") + 1)
@@ -121,7 +121,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "defense_build":
-                stat_change = 1 * upgradeAlgo(player_data("defense_build_step"))
+                stat_change = 2 * upgradeAlgo(player_data("defense_build_step"))
                 setPlayerData("defense_build", player_data("defense_build") + stat_change)
                 setPlayerData("defense_build_step", player_data("defense_build_step") + 1)
                 if (onUpdate) {
