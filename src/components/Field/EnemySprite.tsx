@@ -1,6 +1,8 @@
 import { getPlayerStats } from "../../services/stats"
 import red_dragon from '../../assets/sprites/Dragon_02_Red.png'
+import boss_red_dragon from '../../assets/sprites/Boss_Dragon_01_Red.png'
 import blue_dragon from '../../assets/sprites/Dragon_02_Blue.png'
+import boss_blue_dragon from '../../assets/sprites/Boss_Dragon_01_Blue.png'
 import green_dragon from '../../assets/sprites/Dragon_02_Green.png'
 import { memo } from "react"
 
@@ -11,9 +13,15 @@ export const EnemySprite = memo(() => {
 
     switch(PlayerData("phase")) {
         case 1:
-            return <img className={classes} src={red_dragon} />
+            if(PlayerData("round") === 5)
+                return (<img className={classes} src={boss_red_dragon} />);
+            else
+                return (<img className={classes} src={red_dragon} />);
         case 2:
-            return <img className={classes} src={blue_dragon} />
+            if(PlayerData("round") === 5)
+                return (<img className={classes} src={boss_blue_dragon} />);
+            else
+                return (<img className={classes} src={blue_dragon} />);
         case 3:
             return <img className={classes} src={green_dragon} />
         default:

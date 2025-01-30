@@ -19,11 +19,9 @@ export const Field: StagePage = () => {
     const playClick = useSoundEffect("click")
     const {set, rate} = useMusic()
     
-
     const startDialog = useRef<HTMLDialogElement>(null)
     const endDialog = useRef<HTMLDialogElement>(null)
     
-
     useEffect(() => {
         set(0.4)
         rate(1)
@@ -40,6 +38,8 @@ export const Field: StagePage = () => {
             }
 
             if(victor === "Opponent") {
+                set(0.1)
+                rate(0.6)
                 redirect("/end-game")
             }
         }
@@ -96,7 +96,7 @@ export const Field: StagePage = () => {
                             set(0.1)
                             rate(0.8)
                             playClick()
-                            
+
                             if(PlayerData("phase") > 3) {
                                 redirect("/end-game")
                             } else {

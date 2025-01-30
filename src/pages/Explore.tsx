@@ -13,6 +13,11 @@ export const Explore: ExplorePage = () => {
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
 
+    const big_fight_text = PlayerData("round") === 5?
+        <>Fight the Alpha Dragon!</>:
+        <>Fight Large Dragon <br/> 
+        (3 times stronger than a Small Dragon)</>
+
     return (
         <div className='flex columns mar-auto ui--span-page h-centered full-height gap-25px'>
             <div className='ui--container'>
@@ -22,6 +27,7 @@ export const Explore: ExplorePage = () => {
             </div>
             <div className='flex space-between ui--gap full-width'>
                 <button
+                    style={{display: PlayerData("round") === 5? 'none': ""}}
                     onMouseEnter={() => {playClickEnter()}}
                     className='ui--button-interact-2 ui--container text-bold fill-width'
                     disabled={PlayerData && PlayerData("round") === 5}
@@ -34,6 +40,7 @@ export const Explore: ExplorePage = () => {
                     (Will take up 1 round)
                 </button>
                 <button
+                    style={{display: PlayerData("round") === 5? 'none': ""}}
                     onMouseEnter={() => {playClickEnter()}}
                     className='ui--button-interact-2 ui--container text-bold fill-width'
                     disabled={PlayerData && PlayerData("round") === 5}
@@ -54,8 +61,7 @@ export const Explore: ExplorePage = () => {
                         navigate("/field")
                     }}
                 >
-                    Fight Large Dragon <br/> 
-                    (3 times stronger than a Small Dragon)
+                    {big_fight_text}
                 </button>
             </div>
         </div>

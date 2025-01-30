@@ -1,5 +1,5 @@
 import useSound from 'use-sound';
-import { createContext, FC, ReactNode, useContext, useState } from 'react';
+import { createContext, FC, ReactNode, useContext, useRef, useState } from 'react';
 import music_file from '../assets/sounds/music.mp3'
 
 interface MusicDataObject {
@@ -19,38 +19,46 @@ const MusicContext = createContext<MusicDataObject | null>(null)
 export const setupBackgroundMusic: useBackgroundMusicHook = (
 ) => {
     const [music_volume, setMusicVolume] = useState(0.1)
-    const [set_value, setMusicMax] = useState(1)
     const [music_rate, setMusicRate] = useState(1)
-    const [is_playing, setIsPlaying] = useState(false)
+    const VolRef = useRef({
+        is_playing: false,
+        volume: music_volume,
+        rate: music_rate
+    })
 
     const [play] = useSound(music_file, {
         volume: music_volume,
         loop: true,
         playbackRate: music_rate,
         onplay: () => {
-            setIsPlaying(true)
+            VolRef.current.is_playing = true
+        },
+        onend: () => {
+            play()
         }
     });
 
     const triggerMusic = () => {
-        if(is_playing) return;
+        if(VolRef.current.is_playing) return;
         play()
     }
     const startMusic = () => {
-        setMusic(set_value)
+        setMusic(VolRef.current.volume)
     }
     const stopMusic = () => {
+        VolRef.current.volume = 0
         setMusicVolume(0)
     }
     const setMusic = (set: number) => {
-        
-        setMusicMax(set)
         setMusicVolume(set)
-        
+
+        VolRef.current.volume = set
     }
 
     const setRate = (set: number) => {
         setMusicRate(set)
+
+        VolRef.current.rate = set
     }
     
     return ({children}) => {
