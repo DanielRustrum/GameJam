@@ -92,7 +92,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "attack_damage":
-                stat_change = 1 * upgradeAlgo(player_data("attack_damage_step"))
+                stat_change = 2 * upgradeAlgo(player_data("attack_damage_step"))
                 setPlayerData("attack_damage", player_data("attack_damage") + stat_change)
                 setPlayerData("attack_damage_step", player_data("attack_damage_step") + 1)
                 if (onUpdate) {
@@ -111,7 +111,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "defense_base":
-                stat_change = 1 * upgradeAlgo(player_data("defense_base_step"))
+                stat_change = 2 * upgradeAlgo(player_data("defense_base_step"))
 
                 setPlayerData("defense_base", player_data("defense_base") + stat_change)
                 setPlayerData("defense_base_step", player_data("defense_base_step") + 1)
@@ -140,7 +140,7 @@ export const upgradePlayerStat = (onUpdate?: (
                 }
                 break
             case "luck_base":
-                stat_change = 1 * upgradeAlgo(player_data("luck_base_step"))
+                stat_change = 2 * upgradeAlgo(player_data("luck_base_step"))
                 if(player_data("luck_base") > 50) return;
                 setPlayerData("luck_base", player_data("luck_base") + stat_change)
                 setPlayerData("luck_base_step", player_data("luck_base_step") + 1)

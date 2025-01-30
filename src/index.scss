@@ -7,6 +7,11 @@ body {
     --ui--background-color: rgb(216, 204, 124);
     --ui--border-color: rgb(110, 47, 59);
     // overflow: hidden;
+    image-rendering: pixelated;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url("./assets/sprites/Background_01_draft.png");
 }
 
 .ui--container {
@@ -128,10 +133,54 @@ dialog::backdrop {
 
     @include device.on-desktop {
         bottom: 40vh;
-
     }
 
     @include device.not-on-desktop {
-        bottom: 20vh;
+        bottom: 25vh;
     }
+
+    @include device.on-mobile {
+        padding: 0px 10px;
+    }
+
+    @include device.not-on-mobile {
+        padding: 0px 10vw;
+    }
+}
+
+.sprite--entity {
+    height: auto;
+    @include device.on-desktop {
+        width: 20vw;
+    }
+
+    @include device.on-tablet {
+        width: 30vw;
+    }
+
+    @include device.on-mobile {
+        width: 40vw;
+    
+    }
+}
+
+.animate-floating {  
+    animation-name: floating;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.animate-floating-2 {  
+    animation-name: floating;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-delay: 750ms;
+}
+
+@keyframes floating {
+    from { transform: translate(0,  0px); }
+    65%  { transform: translate(0, 2vh); }
+    to   { transform: translate(0, -0px); }    
 }

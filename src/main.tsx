@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/end-game" element={<End />} />
         <Route path="/town" element={<Town />} />
         <Route path="/tutorial" element={<Tutorial />} />
-      </Routes>
+      </Routes> 
     </BrowserRouter>
   </StrictMode>,
 )

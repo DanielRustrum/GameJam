@@ -9,11 +9,11 @@ export const EnemySprite = memo(() => {
 
     switch(PlayerData("phase")) {
         case 1:
-            return <img src={red_dragon} />
+            return <img className='animate-floating-2 sprite--entity' src={red_dragon} />
         case 2:
-            return <img src={blue_dragon} />
+            return <img className='animate-floating-2 sprite--entity' src={blue_dragon} />
         case 3:
-            return <img src={green_dragon} />
+            return <img className='animate-floating-2 sprite--entity' src={green_dragon} />
         default:
             return <></>
     }

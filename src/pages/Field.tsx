@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getEnemyStats } from '../services/enemy';
 import { EnemySprite } from '../components/Field/EnemySprite';
 import { useSoundEffect } from '../hooks/useSoundEffect';
+import { PlayerSprite } from '../components/Field/PlayerSprite';
 
 type StagePage = FC<{}>
 
@@ -103,9 +104,9 @@ export const Field: StagePage = () => {
                 <EnemyUI />
             </div>
             <div 
-                className="sprite--entities mar-auto flex v-centered space-between span-width-100 pad-25px" 
+                className="sprite--entities mar-auto flex v-centered space-between span-width-100 pad-hori-screen-10" 
             >
-                <p>Player Goes Here</p>
+                <PlayerSprite />
                 <EnemySprite />
             </div>
         </>
