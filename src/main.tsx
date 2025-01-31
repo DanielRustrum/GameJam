@@ -11,6 +11,7 @@ import { Town } from './pages/Town';
 import { Explore } from './pages/Explore';
 import { Tutorial } from './pages/Tutorial';
 import { setupBackgroundMusic } from './hooks/useBackgroundMusic';
+import { Credits } from './pages/Credits';
 
 const NotFound = () => {
   const navigate = useNavigate()
@@ -41,6 +42,7 @@ const Global = () => {
           <Route path="/end-game" element={<End />} />
           <Route path="/town" element={<Town />} />
           <Route path="/tutorial" element={<Tutorial />} />
+          <Route path="/credits" element={<Credits />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

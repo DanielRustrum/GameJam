@@ -1,9 +1,8 @@
-import {FC, useEffect, useRef, useState} from 'react'
+import {FC, useEffect, useRef} from 'react'
 
 import { useNavigate } from 'react-router-dom'
 import { useInitPlayerStats } from '../services/stats'
 import { setPermission, setVolume, useSoundEffect } from '../hooks/useSoundEffect'
-import { useLocalStorageBucket } from '../hooks/useLocalStorage'
 import { useMusic } from '../hooks/useBackgroundMusic'
 import "./Menu.scss"
 
@@ -18,8 +17,6 @@ export const Menu: MenuPage = () => {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
-    const [getSetting] = useLocalStorageBucket("settings")
-    const [sound_state, setSoundState] = useState(getSetting("sound_permission"))
     const {trigger, start, set, rate} = useMusic()
 
     useEffect(() => {
@@ -90,6 +87,17 @@ export const Menu: MenuPage = () => {
                         }}
                     >
                         See Tutorial
+                    </button>
+                    <button
+                        onMouseEnter={() => {playClickEnter()}}
+                        style={{padding: "10px 80px"}}
+                        className='ui--button-interact-2 ui--container text-bold'
+                        onClick={() => {
+                            playClick()
+                            navigate("/credits")  
+                        }}
+                    >
+                        Credits
                     </button>
                 </div>
             </div>
