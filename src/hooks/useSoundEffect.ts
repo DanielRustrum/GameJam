@@ -14,7 +14,8 @@ import player_death_sound from '../assets/sounds/player-death.wav'
 import dragon_death_sound from '../assets/sounds/dragon-death.wav'
 import trade_sound from '../assets/sounds/trade.wav'
 import shield_sound from '../assets/sounds/shield.ogg'
-import shield_stop_sound from '../assets/sounds/shield-stop.ogg'
+import shield_stop_sound from '../assets/sounds/shield-stop.wav'
+import focus_on_sound from '../assets/sounds/focus-on.wav'
 import { useRef } from "react"
 
 
@@ -33,6 +34,7 @@ const SoundMap:{[key: string]: string} = {
     "trade": trade_sound,
     "shield": shield_sound,
     "shield-stop": shield_stop_sound,
+    "focus": focus_on_sound
 }
 
 export const setPermission = (response: boolean) => {

@@ -66,7 +66,7 @@ export const Town: TownPage = () => {
                     onMouseEnter={() => {playClickEnter()}}
                     className='ui--button-interact-2 ui--container fill-width text-bold'
                     disabled={
-                        stock < 3 || PlayerData("current_health") === current_health
+                        stock < 3 || PlayerData("max_health") === current_health
                     }
                     onClick={() => {
                         playTrade()

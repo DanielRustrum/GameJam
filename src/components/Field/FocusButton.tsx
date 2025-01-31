@@ -38,7 +38,7 @@ export const useFocusButton = (
     for (const stat of stats) {
         Buttons.push(({}) => {
             const playClickEnter = useSoundEffect("enter", true)
-            const playClick = useSoundEffect("click")
+            const playFocus = useSoundEffect("focus")
             const [disabled_time_remaining, {start}] = useTimer(1000, 100)
             const [is_disabled, setIsDisabled] = useState(false)
 
@@ -58,7 +58,7 @@ export const useFocusButton = (
                 disabled={is_disabled}
                 onClick={() => {
                     if(!FocusRef.current.is_disabled) {
-                        playClick()
+                        playFocus()
                         if(FocusRef.current.current_focus === stat)
                             FocusRef.current.current_focus = null;
                         else

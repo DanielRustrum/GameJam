@@ -1,4 +1,4 @@
-import {FC, useEffect, useRef} from 'react'
+import {FC} from 'react'
 
 import { useNavigate } from 'react-router-dom'
 import { useInitPlayerStats } from '../services/stats'
@@ -14,26 +14,11 @@ type MenuPage = FC<{}>
 export const Menu: MenuPage = () => {
     const navigate = useNavigate()
     const initPlayer = useInitPlayerStats()
-    const dialogRef = useRef<HTMLDialogElement>(null)
+    // const dialogRef = useRef<HTMLDialogElement>(null)
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
     const {trigger, set, rate} = useMusic()
-    const openRef = useRef(false)
 
-    useEffect(() => {
-        if(!openRef.current) {
-            dialogRef.current?.showModal();
-            openRef.current = true
-        } else {
-            dialogRef.current?.close()
-        }
-        // } else {
-        //     trigger()
-        //     set(0.1)
-        //     rate(0.8)
-        // }
-    }, [])
-    
     return (
         <>
             {/* <dialog ref={dialogRef} className='mar-auto'>
@@ -115,7 +100,7 @@ export const Menu: MenuPage = () => {
                             rate(0.8)
                         }}
                     >
-                        Toggle Sound On
+                        Turn Sound On
                     </button>
                 </div>
             </div>

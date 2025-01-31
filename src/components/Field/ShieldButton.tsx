@@ -18,6 +18,7 @@ export const useShieldButton = (
     const SheldButtonWrapper = () => {
         const playClickEnter = useSoundEffect("enter", true)
         const playShield = useSoundEffect("shield")
+        const playShieldStop = useSoundEffect("shield-stop")
         const [ active_time_remaining, {start: startActiveTimer} ] = useTimer(active_duration, 100)
         const [ disabled_time_remaining, {start: startDisabledTimer} ] = useTimer(charge_duration, 100)
         const [is_disabled, setIsDisabled] = useState(false)
@@ -32,6 +33,7 @@ export const useShieldButton = (
             if(active_time_remaining == 0 && is_active) {
                 startDisabledTimer()
                 setIsActive(false)
+                playShieldStop()
             }
         }, [active_time_remaining])
     
