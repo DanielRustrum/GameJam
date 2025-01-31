@@ -10,6 +10,7 @@ export const Stronghold: StrongholdPage = () => {
     
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
+    const playUpgrade = useSoundEffect("upgrade", true)
 
     let [upgrade_points, setUpgradePoints] = useState(PlayerData("upgrade_points"))
     let [max_health, setMaxHealth] = useState(PlayerData("max_health"))
@@ -57,7 +58,7 @@ export const Stronghold: StrongholdPage = () => {
                             onClick()
                             
                             if (PlayerData("upgrade_points") === 0) return;
-                            playClick()
+                            playUpgrade()
                         }}
                     >
                         Upgrade

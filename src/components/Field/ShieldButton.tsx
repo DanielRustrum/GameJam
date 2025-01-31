@@ -17,7 +17,7 @@ export const useShieldButton = (
 
     const SheldButtonWrapper = () => {
         const playClickEnter = useSoundEffect("enter", true)
-        const playClick = useSoundEffect("click")
+        const playShield = useSoundEffect("shield")
         const [ active_time_remaining, {start: startActiveTimer} ] = useTimer(active_duration, 100)
         const [ disabled_time_remaining, {start: startDisabledTimer} ] = useTimer(charge_duration, 100)
         const [is_disabled, setIsDisabled] = useState(false)
@@ -43,10 +43,13 @@ export const useShieldButton = (
 
         return <button
             className="ui--button-interact-2 ui--container ui--shield-button-mobile" 
+            style={{
+                backgroundColor: is_active? "#80acaa": "#d8cc7d"
+            }}
             onMouseEnter={() => {playClickEnter()}}
             disabled={is_disabled}
             onClick={() => {
-                playClick()
+                playShield()
                 setIsDisabled(true)
                 setIsActive(true)
                 startActiveTimer()

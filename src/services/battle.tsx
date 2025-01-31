@@ -34,9 +34,11 @@ export const setupBattleField: setupBattleFieldFunction = (
     const EnemyData = getEnemyStats()
 
     const playCooldown = useSoundEffect("cooldown", true)
-    const playPlayerAttack = useSoundEffect("player_attack")
-    const playDragonAttack = useSoundEffect("dragon_attack")
-    const playFreezeAttack = useSoundEffect("freeze_attack")
+    const playPlayerAttack = useSoundEffect("player_attack", true)
+    const playDragonAttack = useSoundEffect("dragon_attack", true)
+    const playFreezeAttack = useSoundEffect("freeze_attack", true)
+    const playPlayerDeath = useSoundEffect("player-death", true)
+    const playDragonDeath = useSoundEffect("dragon-death", true)
 
     const battlefieldDataRef = useRef({
         player_defense_stack: PlayerData("defense_base"),
@@ -51,6 +53,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         if(current_health < 1) {
             freezePlayer(Infinity)
             freezeEnemy(Infinity)
+            playDragonDeath()
             if(!battlefieldDataRef.current.has_ended) {
                 setEnemyHealthBar(0)
                 onBattleEnd("Player", battlefieldDataRef.current.player_current_health)
@@ -63,6 +66,7 @@ export const setupBattleField: setupBattleFieldFunction = (
         if(battlefieldDataRef.current.player_current_health < 1) {
             freezePlayer(Infinity)
             freezeEnemy(Infinity)
+            playPlayerDeath()
             if(!battlefieldDataRef.current.has_ended){
                 onBattleEnd("Opponent", 0)
                 battlefieldDataRef.current.has_ended = true
@@ -199,7 +203,7 @@ export const setupBattleField: setupBattleFieldFunction = (
     }] = useCountDownBar("Freeze", EnemyData("freeze_cooldown"), () => {
         playFreezeAttack()
         if(!getIsActive())
-                freezePlayer(EnemyData("freeze_duration"));
+            freezePlayer(EnemyData("freeze_duration"));
     })
     const [EnemyDefenseBar, {
         freezeBar:freezeEnemyDefense,

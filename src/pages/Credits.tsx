@@ -30,6 +30,8 @@ export const Credits = () => {
                     <a className="text-no-underline text-bold" href="https://freesound.org/people/StormwaveAudio/">StormwaveAudio</a>
                     <a className="text-no-underline text-bold" href="https://freesound.org/people/Osvoldon/">Osvoldon</a>
                     <a className="text-no-underline text-bold" href="https://freesound.org/people/MaxDemianAGL/">MaxDemianAGL</a>
+                    <a className="text-no-underline text-bold" href="https://freesound.org/people/PhreaKsAccount/">PhreaKsAccount</a>
+                    <a className="text-no-underline text-bold" href="https://freesound.org/people/Metzik/">Metzik</a>
                 </div>
 
                 <div className='pad-top-25px flex centered'>

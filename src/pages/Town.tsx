@@ -50,6 +50,7 @@ export const Town: TownPage = () => {
     const next_round = usePlayerRounds()
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
+    const playTrade = useSoundEffect("trade", true)
     const [current_health, setCurrentHealth] = useState(PlayerData("current_health"))
 
     if(PlayerData === undefined) return <></>
@@ -64,9 +65,11 @@ export const Town: TownPage = () => {
                 <button
                     onMouseEnter={() => {playClickEnter()}}
                     className='ui--button-interact-2 ui--container fill-width text-bold'
-                    disabled={stock < 3}
+                    disabled={
+                        stock < 3 || PlayerData("current_health") === current_health
+                    }
                     onClick={() => {
-                        playClick()
+                        playTrade()
                         trade(3, "heal")
                         const new_current = 200 + PlayerData("current_health")
 
@@ -87,7 +90,7 @@ export const Town: TownPage = () => {
                     className='ui--button-interact-2 ui--container fill-width text-bold'
                     disabled={stock < 2}
                     onClick={() => {
-                        playClick()
+                        playTrade()
                         trade(2, "upgrade")
                     }}
                 >

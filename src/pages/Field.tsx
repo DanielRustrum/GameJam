@@ -16,7 +16,9 @@ export const Field: StagePage = () => {
     const redirect = useNavigate()
     const nextRound = usePlayerRounds()
     const playClickEnter = useSoundEffect("enter", true)
-    const playClick = useSoundEffect("click")
+    const playClick = useSoundEffect("click", true)
+    const playRoar = useSoundEffect("roar", true)
+
     const {set, rate} = useMusic()
     
     const startDialog = useRef<HTMLDialogElement>(null)
@@ -67,6 +69,8 @@ export const Field: StagePage = () => {
                         onClick={() => {
                             startBattle()
                             playClick()
+                            playRoar()
+
                             
                             startDialog.current?.close()
                         }}
