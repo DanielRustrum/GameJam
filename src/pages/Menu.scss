@@ -1,0 +1,68 @@
+@use '../styles/device.scss' as device;
+
+.decal {
+    height: auto;
+
+    @include device.on-desktop {
+        width: 90vw;
+    }
+
+    @include device.on-tablet {
+        width: 30vw;
+    }
+
+    @include device.on-mobile {
+        width: 150vw;
+    
+    }
+}
+
+.ship {
+    position: fixed;
+    
+    @include device.on-desktop {
+        top: 10vh;
+        left: 25vw;
+
+    }
+
+    @include device.on-tablet {
+        top: 12vh;
+        left: -30vw;
+        width: 60vw;
+
+    }
+
+    @include device.on-mobile {
+        top: 10vh;
+        left: -40vw;
+        width: 400vw;
+
+    
+    }
+}
+
+.dragon {
+    position: fixed;
+    
+    @include device.on-desktop {
+        bottom: 10vh;
+        right: 25vw;
+
+    }
+
+    @include device.on-tablet {
+        bottom: -2vh;
+        right: -10vw;
+        width: 60vw;
+
+    }
+
+    @include device.on-mobile {
+        bottom: -2vh;
+        right: -10vw;
+        width: 400vw;
+
+    
+    }
+}

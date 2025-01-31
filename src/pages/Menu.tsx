@@ -5,6 +5,10 @@ import { useInitPlayerStats } from '../services/stats'
 import { setPermission, setVolume, useSoundEffect } from '../hooks/useSoundEffect'
 import { useLocalStorageBucket } from '../hooks/useLocalStorage'
 import { useMusic } from '../hooks/useBackgroundMusic'
+import "./Menu.scss"
+
+import decal1 from '../assets/sprites/Title_Decal_Dragon_01.png'
+import decal2 from '../assets/sprites/Title_Decal_Ship_01.png'
 
 type MenuPage = FC<{}>
 
@@ -58,7 +62,10 @@ export const Menu: MenuPage = () => {
                     </div>
                 </div>
             </dialog>
-            <div className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'>
+            <div 
+                id="page--menu"
+                className='mar-auto flex columns v-centered h-centered full-height pad-bottom-100px gap-50px'
+            >
                 <h1>Dragon Fish</h1>
                 <div className='flex columns gap-10px'>
                     <button
@@ -86,6 +93,8 @@ export const Menu: MenuPage = () => {
                     </button>
                 </div>
             </div>
+            <img className="decal dragon" src={decal1} />
+            <img className="decal ship" src={decal2} />
         </>
     )
 }
