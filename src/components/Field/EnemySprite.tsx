@@ -4,6 +4,7 @@ import boss_red_dragon from '../../assets/sprites/Boss_Dragon_01_Red.png'
 import blue_dragon from '../../assets/sprites/Dragon_02_Blue.png'
 import boss_blue_dragon from '../../assets/sprites/Boss_Dragon_01_Blue.png'
 import green_dragon from '../../assets/sprites/Dragon_02_Green.png'
+import boss_green_dragon from '../../assets/sprites/Boss_Dragon_01_Green.png'
 import { memo } from "react"
 
 export const EnemySprite = memo(() => {
@@ -23,7 +24,10 @@ export const EnemySprite = memo(() => {
             else
                 return (<img className={classes} src={blue_dragon} />);
         case 3:
-            return <img className={classes} src={green_dragon} />
+            if(PlayerData("round") === 5)
+                return (<img className={classes} src={boss_green_dragon} />);
+            else
+                return (<img className={classes} src={green_dragon} />);
         default:
             return <></>
     }
