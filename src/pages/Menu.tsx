@@ -14,18 +14,16 @@ export const Menu: MenuPage = () => {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const playClickEnter = useSoundEffect("enter", true)
     const playClick = useSoundEffect("click")
-    const [getSetting, __, checkSetting] = useLocalStorageBucket("settings")
+    const [getSetting] = useLocalStorageBucket("settings")
     const [sound_state, setSoundState] = useState(getSetting("sound_permission"))
     const {trigger, start, set, rate} = useMusic()
 
     useEffect(() => {
-        if(checkSetting("sound_permission")) {
-            dialogRef.current?.showModal();
-        } else {
-            trigger()
-            set(0.1)
-            rate(0.8)
-        }
+        // if(checkSetting("sound_permission")) {
+        dialogRef.current?.showModal();
+        // } else {
+            
+        // }
     }, [])
     
     return (
@@ -43,6 +41,9 @@ export const Menu: MenuPage = () => {
                                 start()
                                 setPermission(true)
                                 playClick()
+                                trigger()
+                                set(0.1)
+                                rate(0.8)
                                 dialogRef.current?.close()
                             }}
                         >Yes!</button>
@@ -90,6 +91,7 @@ export const Menu: MenuPage = () => {
                         onClick={() => {
                             setPermission(!getSetting("sound_permission"))
                             setSoundState(!getSetting("sound_permission"))
+                            
                             playClick()
                         }}
                     >
