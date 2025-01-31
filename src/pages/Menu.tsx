@@ -84,20 +84,6 @@ export const Menu: MenuPage = () => {
                     >
                         See Tutorial
                     </button>
-                    <button
-                        onMouseEnter={() => {playClickEnter()}}
-                        style={{padding: "10px 80px"}}
-                        className='ui--button-interact-2 ui--container text-bold'
-                        onClick={() => {
-                            setPermission(!getSetting("sound_permission"))
-                            setSoundState(!getSetting("sound_permission"))
-                            
-                            playClick()
-                        }}
-                    >
-                        Toggle Sound <br /><br />
-                        Sound is {sound_state? "off": "on"}
-                    </button>
                 </div>
             </div>
         </>
