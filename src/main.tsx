@@ -27,13 +27,13 @@ const NotFound = () => {
 const Global = () => {
   const MusicWrapper = setupBackgroundMusic()
   
-  const router_props = {
-    basename: import.meta.env.BASE_URL === "/"? undefined: import.meta.env.BASE_URL
-  }
+  // const router_props = {
+  //   basename: import.meta.env.BASE_URL === "/"? undefined: import.meta.env.BASE_URL
+  // }
 
   return (
     <MusicWrapper>
-      <BrowserRouter {...router_props}>
+      <BrowserRouter >
         <Routes>
           <Route path="/" element={<Menu />} />
           <Route path="/field" element={<Field />} />
