@@ -14,7 +14,7 @@ export const AudioController: AudioControllerComponent = ({}) => {
 }
 
 type useSoundEffectHook = (
-    audio_file: string, 
+    effect_name: string, 
     options: {
         volume: LessThan<number, 1> & GreaterThan<0, number>,
     }
@@ -25,7 +25,7 @@ type useSoundEffectHook = (
     }
 ]
 
-export const useSoundEffect: useSoundEffectHook = (audio_file, options) => {
+export const useSoundEffect: useSoundEffectHook = (effect_name, options) => {
     const SoundEffect = new Howl({src: [test_sound]})
     
     return [

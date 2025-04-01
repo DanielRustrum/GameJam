@@ -2,7 +2,4 @@ import { addScene } from "../engine/game"
 
 const Scene = () => <>test</>
 
-export default () => {
-    console.log("text")
-    addScene("menu", Scene)
-}
+export default () => addScene("menu", Scene)
