@@ -21,6 +21,7 @@
     "react-router-dom": "^7.1.2",
     "react-spring": "^9.7.5",
     "react-use": "^17.6.0",
+    "ts-arithmetic": "^0.1.1",
     "use-sound": "^4.0.3"
   },
   "devDependencies": {

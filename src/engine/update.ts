@@ -113,20 +113,20 @@ export const timer = (
     }
 }
 
-export const step = (
-    step_amount: number,
-    onUpdate?: (step: number) => void,
+export const tick = (
+    tick_amount: number,
+    onUpdate?: (tick: number) => void,
     onFinish?: () => void
 ) => {
-    let current_step: number = 0
+    let current_tick: number = 0
 
     const Loop = animationLoop({
         onTick: () => {
-            current_step += 1
-            if(onUpdate !== undefined) onUpdate(current_step);
+            current_tick += 1
+            if(onUpdate !== undefined) onUpdate(current_tick);
         },
         endCondition: () => {
-            return (current_step === step_amount || current_step > step_amount)
+            return (current_tick === tick_amount || current_tick > tick_amount)
         },
         onEnd: () => {
             if(onFinish !== undefined) onFinish();
@@ -139,7 +139,7 @@ export const step = (
 
     const reset = () => {
         Loop.stop()
-        current_step = 0
+        current_tick = 0
     }
 
     return { start, reset }

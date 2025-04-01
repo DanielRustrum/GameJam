@@ -85,3 +85,48 @@ export const useStateLink: useStateLinkHook = (group) => {
         }
     ]
 }
+
+type useStorageHook = <Casted = unknown>(
+    bucket_name: string,
+    castingFunction?: (data: string) => Casted
+) => {
+    get: (key: string, fallback?: Casted) => Casted
+    set: (key: string, set: Casted) => void
+    check: (key: string) => boolean
+    remove: (key: string) => void
+    purge: () => void
+}
+
+export const useStorage:useStorageHook = ( 
+        bucket_name, castingFunction
+) => {
+    return {
+        get: (key, fallback = undefined) => {
+            const result = localStorage.getItem(`${bucket_name}.${key}`)
+            
+            if(result === null) return fallback;
+            
+            return (
+                castingFunction === undefined? 
+                    JSON.parse(result):
+                    castingFunction(result)
+            )
+        },
+        set: (key, set) => {
+            const bucket_item = localStorage.getItem(`${bucket_name}.${key}`)
+            const bucket = localStorage.getItem(bucket_name) ?? ""
+
+            if(bucket_item === null) localStorage.setItem(bucket_name, `${bucket},${key}`);
+
+            localStorage.setItem(`${bucket_name}.${key}`, JSON.stringify(set))
+        },
+        check: (key) => localStorage.getItem(`${bucket_name}.${key}`) !== null,
+        remove: (key) => localStorage.removeItem(`${bucket_name}.${key}`),
+        purge: () => {
+            const bucket = localStorage.getItem(bucket_name) ?? ""
+            bucket.split(",").forEach(key => {
+                if(key !== "") localStorage.removeItem(`${bucket_name}.${key}`);
+            })
+        }
+    }
+}
