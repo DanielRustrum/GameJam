@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
+import styleX from "vite-plugin-stylex" 
 // import zipPack from "vite-plugin-zip-pack";
 
 // let base = "/GameJam"
@@ -20,6 +21,6 @@ export default defineConfig({
       '@data': path.resolve(__dirname, 'src/data'),
     },
   },
-  plugins: [react()],
+  plugins: [react(), styleX()],
   base: "./"
 })

@@ -86,18 +86,21 @@ export const useStateLink: useStateLinkHook = (group) => {
     ]
 }
 
-type useStorageHook = <Casted = unknown>(
-    bucket_name: string,
-    castingFunction?: (data: string) => Casted
-) => {
-    get: (key: string, fallback?: Casted) => Casted
-    set: (key: string, set: Casted) => void
-    check: (key: string) => boolean
-    remove: (key: string) => void
-    purge: () => void
+interface LocalStorageMethods<Casted> {
+    get(key: string, fallback: Casted): Casted
+    get(key: string): Casted | undefined
+    set(key: string, set: Casted): void
+    check(key: string): boolean
+    remove(key: string): void
+    purge(): void
 }
 
-export const useStorage:useStorageHook = ( 
+type localStorageFunction = <Casted = unknown>(
+    bucket_name: string,
+    castingFunction?: (value: string) => Casted
+) => LocalStorageMethods<Casted>
+
+export const localStore:localStorageFunction = ( 
         bucket_name, castingFunction
 ) => {
     return {

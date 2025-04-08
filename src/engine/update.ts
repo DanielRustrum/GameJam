@@ -9,7 +9,7 @@ type AnimationLoopFunction = (arg: {
     reset: () => void
 }
  
-const animationLoop: AnimationLoopFunction = ({
+export const animationLoop: AnimationLoopFunction = ({
     onInit, onTick, endCondition, onEnd
 }) => {
     let loop_id: null | number = null
@@ -62,6 +62,7 @@ export const timer = (
             elapsed_time = timestamp
         },
         onTick: (timestamp) => {
+            console.log(start_time, duration)
             const reduced_time_interval = Math.min(
                 interval, 
                 (current_time || Infinity)
