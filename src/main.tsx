@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.scss'
-import './styles/stylex.css'
+import './index.css'
+import './stylex.css'
 import { GameController } from './engine/game'
 
 const Error = ({}) => <></>
