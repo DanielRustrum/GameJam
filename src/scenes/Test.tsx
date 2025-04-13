@@ -4,7 +4,7 @@ import { soundEffect } from "../engine/audio"
 const [click, {volume, rate}] = soundEffect("shield-stop")
 
 
-export const Scene = () => {
+export const Panel = () => {
     const [click_volume, setClickVolume] = useState(0.5)
 
     useEffect(() => {

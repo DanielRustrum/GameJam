@@ -1,18 +1,18 @@
 import { Component } from "../types/component"
-import { SceneController } from "./scene"
+import { PanelController } from "./panel"
 
 type GameControllerComponent = Component<{
-    SceneErrorComponent: Component,
-    entry_scene: string
+    PanelErrorComponent: Component,
+    entry_panel: string
 }>
 
 export const GameController: GameControllerComponent = ({
-    entry_scene, SceneErrorComponent, children
+    entry_panel, PanelErrorComponent, children
 }) => {
-    return <SceneController 
-        entry_scene={entry_scene} 
-        SceneErrorComponent={SceneErrorComponent}
+    return <PanelController 
+        entry_panel={entry_panel} 
+        PanelErrorComponent={PanelErrorComponent}
     >
         {children}
-    </SceneController>
+    </PanelController>
 }

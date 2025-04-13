@@ -1,6 +1,7 @@
 import { memo, useRef } from "react";
 import { Component } from "../types/component";
 import * as stylex from '@stylexjs/stylex';
+import { OptionObjectFromArgs } from "../types/object";
 
 type SpritesheetFunction = (
     src: string,
@@ -8,6 +9,8 @@ type SpritesheetFunction = (
         tile_size?: [height: number, width: number]
         frame_time?: number
         structure?: { [state: string]: { layer: number, length: number } }
+        svg?: boolean
+        loading?: "load" | "preload" | "background"
     }
 ) => Component<{
     state?: string
@@ -61,10 +64,12 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         sheet_size = [sheet.naturalHeight, sheet.naturalWidth]
     }
 
-    const opts = {
+    const opts: OptionObjectFromArgs<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
         frame_time: .15,
         structure: { "main": { layer: 0, length: 5 } },
+        svg: false,
+        loading: "load",
         ...options
     }
 
