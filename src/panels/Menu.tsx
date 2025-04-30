@@ -1,21 +1,23 @@
 import { usePanelNavigation } from "../engine/panel"
-import { spritesheet } from "../engine/sprite"
+import { region, spritesheet } from "../engine/graphics"
 
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'
 
 const Sprite = spritesheet(test_sheet, {
     tile_size: [32,32],
     frame_time: .25,
-    structure: {"main": {layer: 0, length: 4}}
+    structure: {"main": {type: "animated", layer: 0, length: 4}}
 })
+
+const Region = region("test")
 
 export const Panel = () =>{ 
     const navigate = usePanelNavigation()
     return <>
         <button onClick={() => navigate("test")}>test</button>
-        <Sprite state="main" rate={3}/>
-        <Sprite state="main" scale={4}/>
-        <p className="text-xl font-bold underline">
+        <Region style={{width: "100px", height: "100px"}} />
+        <Sprite state="main" />
+        <p className="text-4xl font-bold">
             Hello world!
         </p>
     </>

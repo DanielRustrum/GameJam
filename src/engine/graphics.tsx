@@ -1,30 +1,42 @@
-import { memo, useRef } from "react";
+import { CSSProperties, Key, memo, useRef } from "react";
 import { Component } from "../types/component";
-import * as stylex from '@stylexjs/stylex';
-import { OptionObjectFromArgs } from "../types/object";
+import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
+import { Application } from "@pixi/react";
+import { Application as App, Assets, Renderer, Texture } from "pixi.js";
+import { create, keyframes, props } from "@stylexjs/stylex";
+
 
 type SpritesheetFunction = (
     src: string,
-    options?: {
-        tile_size?: [height: number, width: number]
-        frame_time?: number
-        structure?: { [state: string]: { layer: number, length: number } }
-        svg?: boolean
-        loading?: "load" | "preload" | "background"
-    }
+    options: OptionObjectDefinition<{
+        tile_size: [height: number, width: number]
+        frame_time: number
+        structure: {
+            [state: string]: {
+                type: "tile" | "animated"
+                layer: number
+                length?: number
+                loop?: boolean
+                rate?: number
+                transition_to?: string
+            }
+        }
+        loading: "load" | "preload" | "background"
+    }>
 ) => Component<{
-    state?: string
+    state: string
     alt?: string
+    tile?: number
     rate?: number
     scale?: number
 }>
 
-const sprite_animation = stylex.keyframes({
+const sprite_animation = keyframes({
     '100%': { backgroundPositionX: "0px" },
     '0%': { backgroundPositionX: "var(--sprite-length)" },
 })
 
-const styles = stylex.create({
+const styles = create({
     sprite: (
         src: string,
         tile_width: number,
@@ -64,11 +76,10 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         sheet_size = [sheet.naturalHeight, sheet.naturalWidth]
     }
 
-    const opts: OptionObjectFromArgs<SpritesheetFunction, 1> = {
+    const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
         frame_time: .15,
         structure: { "main": { layer: 0, length: 5 } },
-        svg: false,
         loading: "load",
         ...options
     }
@@ -79,11 +90,9 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         rate = 1,
         scale = 1,
     }) => {
-        const element = useRef<HTMLElement | null>(null)
-        if (element.current !== null && element.current.closest('svg') !== null) {}
         return <div
             aria-label={alt}
-            {...stylex.props(styles.sprite(
+            {...props(styles.sprite(
                 src,
                 opts.tile_size[1],
                 opts.tile_size[0],
@@ -98,3 +107,40 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         />
     })
 }
+
+type RegionFunction = (
+    name: string,
+    assets?: Array<string>,
+    options?: OptionObjectDefinition<{
+        size: [height: number, width: number]
+   }>
+) => Component<{
+    style?: CSSProperties
+    className?: string
+    alt_text?: string
+    regionMethod?: (app: App<Renderer>, assets: Array<string>) => Promise<void>
+    key?: Key | null
+}>
+
+export const region: RegionFunction = (name, assets=[], options = {}) => {
+    const opts: OptionObjectDefaults<RegionFunction, 2> = {
+        size: [100, 100],
+        ...options
+    }
+
+
+    return ({style, className, alt_text, key, regionMethod}) => {
+        const containerRef = useRef<null | HTMLDivElement>(null)
+
+        return <div id={`region-${name}`} key={key} ref={containerRef} style={style} className={className} aria-label={alt_text}>
+            <Application 
+                onInit={async (app) => {
+                    if(regionMethod !== undefined) await regionMethod(app, assets);
+                }}
+                autoStart 
+                sharedTicker 
+                resizeTo={containerRef} 
+            />
+        </div>
+    }
+} 

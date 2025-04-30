@@ -12,7 +12,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
       '@assets': path.resolve(__dirname, 'src/assets'),
       '@components': path.resolve(__dirname, 'src/components'),
-      '@scenes': path.resolve(__dirname, 'src/scenes'),
+      '@panels': path.resolve(__dirname, 'src/panels'),
       '@engine': path.resolve(__dirname, 'src/engine'),
       '@mechanics': path.resolve(__dirname, 'src/mechanics'),
       '@types': path.resolve(__dirname, 'src/types'),

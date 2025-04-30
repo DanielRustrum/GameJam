@@ -1,12 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { Component } from "../types/component"
 
-const panels = Object.values(import.meta.glob(
-    '@panels/*.tsx',
-    {eager: true}
-))
-
-
 export const useWindowFocus = () => {
     const [is_focused, setIsFocused] = useState(true)
   
@@ -26,11 +20,10 @@ export const useWindowFocus = () => {
     return is_focused
 }
 
-const PanelMap = new Map<string, Component>()
-
 type PanelControllerComponent = Component<{
     PanelErrorComponent: Component,
-    entry_panel: string
+    entry_panel: string,
+    panels: {[key: string]: Component}
 }>
 type GlobalPanelMethods = {
     changePanel: (name: string) => void
@@ -38,9 +31,14 @@ type GlobalPanelMethods = {
 
 const GlobalPanelContext = createContext<GlobalPanelMethods | null>(null)
 
-export const PanelController: PanelControllerComponent = ({entry_panel, PanelErrorComponent, children}) => {
+export const PanelController: PanelControllerComponent = ({
+    entry_panel, 
+    PanelErrorComponent, 
+    children, 
+    panels
+}) => {
     const [current_panel, setCurrentPanel] = useState(entry_panel)
-    const Panel = PanelMap.get(current_panel)
+    const Panel = panels[current_panel]
 
     if(Panel === undefined) return <PanelErrorComponent />;
 
@@ -57,8 +55,3 @@ export const usePanelNavigation = () => {
     const GameObject = useContext(GlobalPanelContext)
     return (name: string) => GameObject?.changePanel(name)
 }
-
-//? Needs to be called last because addPanel needs to be defined
-panels.map((mod: any) => {
-    PanelMap.set(mod.name, mod.Panel)
-})
