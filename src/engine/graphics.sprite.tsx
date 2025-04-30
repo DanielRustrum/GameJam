@@ -28,10 +28,9 @@ type SpritesheetFunction = (
 ) => Component<{
     state: string
     alt?: string
-    tile?: number
     rate?: number
+    tile?: number
     scale?: number
-    frame?: number
 }>
 
 const sprite_animation = keyframes({
@@ -93,13 +92,6 @@ const styles = create({
 });
 
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
-    const sheet = new Image();
-    let sheet_size = [32, 128]
-    sheet.src = src
-    sheet.onload = () => {
-        sheet_size = [sheet.naturalHeight, sheet.naturalWidth]
-    }
-
     const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
         frame_time: .15,
@@ -107,13 +99,20 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         loading: "load",
         ...options
     }
+    
+    const sheet = new Image();
+    let sheet_size = [32, 128]
+    sheet.src = src
+    sheet.onload = () => {
+        sheet_size = [sheet.naturalHeight, sheet.naturalWidth]
+    }
 
     return memo(({
         state = "main", 
         alt = "",
         rate = 1,
         scale = 1,
-        frame = 0
+        tile = 0
     }) => {
         switch(opts.structure[state].type) {
             case "animated":
@@ -140,7 +139,7 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
                         opts.tile_size[1],
                         opts.tile_size[0],
                         opts.structure[state].layer,
-                        frame,
+                        tile,
                         scale,
                         sheet_size[1],
                         sheet_size[0],

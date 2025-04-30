@@ -17,7 +17,7 @@ type RegionFunction = (
 }>
 
 
-export const region: RegionFunction = (name, assets=[], options = {}) => {
+export const region: RegionFunction = (name, assets=[]) => {
 
     return ({style, className, alt_text, key, regionMethod}) => {
         const containerRef = useRef<null | HTMLDivElement>(null)
@@ -28,7 +28,8 @@ export const region: RegionFunction = (name, assets=[], options = {}) => {
                     if(regionMethod !== undefined) await regionMethod(app, assets);
                 }}
                 autoStart 
-                sharedTicker 
+                sharedTicker
+                backgroundAlpha={0}
                 resizeTo={containerRef} 
             />
         </div>

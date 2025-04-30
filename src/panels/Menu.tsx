@@ -1,8 +1,10 @@
 import { usePanelNavigation } from "../engine/panel"
 import { spritesheet } from "../engine/graphics.sprite"
-import { region } from "../engine/graphics.complex"
+import { Button } from "@/components/UI/Button"
+import { Slider } from "@/components/UI/slider"
 
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'
+import { memo, useState } from "react"
 
 const Sprite = spritesheet(test_sheet, {
     tile_size: [32,32],
@@ -13,21 +15,76 @@ const Sprite = spritesheet(test_sheet, {
     }
 })
 
-const Region = region("test")
+export const RateAnimated = memo(() => {
+    const [rate, setRate] = useState(1)
+    
+    return <div className="flex gap-10">
+        <Sprite state="main" rate={rate} />
+        <Slider
+            defaultValue={[1]}
+            min={0}
+            max={2}
+            step={.1}
+            className="w-50"
+            onValueChange={value => {
+                if(value[0] !== rate) setRate(value[0]);
+            }}
+        />
+        <p>{rate}</p>
+    </div>
+})
+
+export const ScaleAnimated = memo(() => {
+    const [scale, setScale] = useState(1)
+    
+    return <div className="flex gap-10 items-center">
+        <Sprite state="main" scale={scale} />
+        <Slider
+            defaultValue={[1]}
+            min={.5}
+            max={2}
+            step={.1}
+            className="w-50"
+            onValueChange={value => {
+                if(value[0] !== scale) setScale(value[0]);
+            }}
+        />
+        <p>{scale}</p>
+    </div>
+})
+
+export const ScaleStatic = memo(() => {
+    const [scale, setScale] = useState(1)
+    
+    return <div className="flex gap-10 items-center">
+        <Sprite state="tile" scale={scale} />
+        <Slider
+            defaultValue={[1]}
+            min={.5}
+            max={2}
+            step={.1}
+            className="w-50"
+            onValueChange={value => {
+                if(value[0] !== scale) setScale(value[0]);
+            }}
+        />
+        <p>{scale}</p>
+    </div>
+})
+
 
 export const Panel = () =>{ 
     const navigate = usePanelNavigation()
     return <>
-        <button onClick={() => navigate("test")}>test</button>
-        <Region style={{width: "100px", height: "100px"}} />
-        <Sprite state="main" />
-        <Sprite state="main" rate={.5} />
-        <Sprite state="main" scale={2}/>
-        <Sprite state="tile" frame={3} />
-        <Sprite state="tile" scale={2} frame={1} />
         <p className="text-4xl font-bold">
             Hello world!
         </p>
+        <Button onClick={() => navigate("test")}>Navigate to Test</Button>
+        <Sprite state="main" />
+        <RateAnimated />
+        <ScaleAnimated />
+        <Sprite state="tile" tile={3} />
+        <ScaleStatic />
     </>
 }
 
