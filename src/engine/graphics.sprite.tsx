@@ -1,8 +1,6 @@
-import { CSSProperties, Key, memo, useRef } from "react";
+import { memo } from "react";
 import { Component } from "../types/component";
 import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
-import { Application } from "@pixi/react";
-import { Application as App, Assets, Renderer, Texture } from "pixi.js";
 import { create, keyframes, props } from "@stylexjs/stylex";
 
 
@@ -13,12 +11,16 @@ type SpritesheetFunction = (
         frame_time: number
         structure: {
             [state: string]: {
-                type: "tile" | "animated"
+                type: "animated"
                 layer: number
-                length?: number
+                length: number
                 loop?: boolean
                 rate?: number
                 transition_to?: string
+            } | {
+                type: "tile" 
+                layer: number
+                length: number
             }
         }
         loading: "load" | "preload" | "background"
@@ -29,6 +31,7 @@ type SpritesheetFunction = (
     tile?: number
     rate?: number
     scale?: number
+    frame?: number
 }>
 
 const sprite_animation = keyframes({
@@ -37,7 +40,7 @@ const sprite_animation = keyframes({
 })
 
 const styles = create({
-    sprite: (
+    sprite_animated: (
         src: string,
         tile_width: number,
         tile_height: number,
@@ -49,9 +52,8 @@ const styles = create({
         sheet_width: number,
         sheet_height: number
     ) => ({
-        '--sprite-scale': scale,
-        '--sprite-length': `calc(${sheet_width}px * var(--sprite-scale))`,
-        '--sprite-height': `calc(${sheet_height}px * var(--sprite-scale))`,
+        '--sprite-length': `calc(${sheet_width}px * ${scale})`,
+        '--sprite-height': `calc(${sheet_height}px * ${scale})`,
         
         backgroundImage: `url(${src})`,
         height: `${tile_height * scale}px`,
@@ -66,6 +68,28 @@ const styles = create({
         animationTimingFunction: `steps(${frames}, end)`,
         animationIterationCount: 'infinite',
     }),
+    sprite_static: (
+        src: string,
+        tile_width: number,
+        tile_height: number,
+        layer: number,
+        frame: number,
+        scale: number,
+        sheet_width: number,
+        sheet_height: number
+    ) => ({
+        '--sprite-length': `calc(${sheet_width}px * ${scale})`,
+        '--sprite-height': `calc(${sheet_height}px * ${scale})`,
+        
+        backgroundImage: `url(${src})`,
+        height: `${tile_height * scale}px`,
+        width: `${tile_width * scale}px`,
+
+        backgroundSize: `var(--sprite-length) var(--sprite-height)`,
+        backgroundPositionY: `${layer * tile_height}px`,
+        imageRendering: "pixelated",
+        backgroundPositionX: `${tile_width * scale * frame}px`
+    })
 });
 
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
@@ -89,58 +113,40 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         alt = "",
         rate = 1,
         scale = 1,
+        frame = 0
     }) => {
-        return <div
-            aria-label={alt}
-            {...props(styles.sprite(
-                src,
-                opts.tile_size[1],
-                opts.tile_size[0],
-                opts.structure[state].layer,
-                opts.structure[state].length,
-                opts.frame_time,
-                rate,
-                scale,
-                sheet_size[1],
-                sheet_size[0],
-            ))}
-        />
+        switch(opts.structure[state].type) {
+            case "animated":
+                return <div
+                    aria-label={alt}
+                    {...props(styles.sprite_animated(
+                        src,
+                        opts.tile_size[1],
+                        opts.tile_size[0],
+                        opts.structure[state].layer,
+                        opts.structure[state].length,
+                        opts.frame_time,
+                        rate,
+                        scale,
+                        sheet_size[1],
+                        sheet_size[0],
+                    ))}
+                />
+            case "tile":
+                return <div
+                    aria-label={alt}
+                    {...props(styles.sprite_static(
+                        src,
+                        opts.tile_size[1],
+                        opts.tile_size[0],
+                        opts.structure[state].layer,
+                        frame,
+                        scale,
+                        sheet_size[1],
+                        sheet_size[0],
+                    ))}
+                />
+        }
+        
     })
 }
-
-type RegionFunction = (
-    name: string,
-    assets?: Array<string>,
-    options?: OptionObjectDefinition<{
-        size: [height: number, width: number]
-   }>
-) => Component<{
-    style?: CSSProperties
-    className?: string
-    alt_text?: string
-    regionMethod?: (app: App<Renderer>, assets: Array<string>) => Promise<void>
-    key?: Key | null
-}>
-
-export const region: RegionFunction = (name, assets=[], options = {}) => {
-    const opts: OptionObjectDefaults<RegionFunction, 2> = {
-        size: [100, 100],
-        ...options
-    }
-
-
-    return ({style, className, alt_text, key, regionMethod}) => {
-        const containerRef = useRef<null | HTMLDivElement>(null)
-
-        return <div id={`region-${name}`} key={key} ref={containerRef} style={style} className={className} aria-label={alt_text}>
-            <Application 
-                onInit={async (app) => {
-                    if(regionMethod !== undefined) await regionMethod(app, assets);
-                }}
-                autoStart 
-                sharedTicker 
-                resizeTo={containerRef} 
-            />
-        </div>
-    }
-} 
