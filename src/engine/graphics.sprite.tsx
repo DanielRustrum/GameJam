@@ -1,8 +1,19 @@
-import { memo } from "react";
+import { memo, RefObject, useEffect, useState } from "react";
 import { Component } from "../types/component";
 import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
-import { create, keyframes, props } from "@stylexjs/stylex";
+import { create, keyframes, props, StyleXStyles } from "@stylexjs/stylex";
 
+
+type Sprite = Component<{
+    state: string
+    alt?: string
+    rate?: number
+    tile?: number
+    scale?: number
+    styles?: StyleXStyles
+    shader?: string
+    resizeTo?: RefObject<HTMLElement>
+}>
 
 type SpritesheetFunction = (
     src: string,
@@ -18,29 +29,38 @@ type SpritesheetFunction = (
                 rate?: number
                 transition_to?: string
             } | {
-                type: "tile" 
+                type: "tile"
                 layer: number
                 length: number
             }
         }
         loading: "load" | "preload" | "background"
     }>
-) => Component<{
-    state: string
-    alt?: string
-    rate?: number
-    tile?: number
-    scale?: number
-}>
+) => [Sprite, {
+    shader: (id: string, callback: (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) => void) => void
+}]
 
-const sprite_animation = keyframes({
-    '100%': { backgroundPositionX: "0px" },
-    '0%': { backgroundPositionX: "var(--sprite-length)" },
+const sprite_animation_image = keyframes({
+    '100%': { objectPosition: `0px var(--sprite-layer)` },
+    '0%': { objectPosition: `var(--sprite-last-frame) var(--sprite-layer)` },
 })
 
-const styles = create({
-    sprite_animated: (
-        src: string,
+const sprite_styles = create({
+    sprite_static_image: (
+        tile_width: number,
+        tile_height: number,
+        layer: number,
+        frame: number,
+        scale: number,
+    ) => ({
+        height: `${tile_height * scale}px`,
+        width: `${tile_width * scale}px`,
+
+        objectPosition: `-${tile_width * scale * (frame - 1)}px ${layer * scale * tile_height}px`,
+        imageRendering: "pixelated",
+        objectFit: "cover",
+    }),
+    sprite_animation_image: (
         tile_width: number,
         tile_height: number,
         layer: number,
@@ -48,50 +68,29 @@ const styles = create({
         timing: number,
         rate: number,
         scale: number,
-        sheet_width: number,
-        sheet_height: number
     ) => ({
-        '--sprite-length': `calc(${sheet_width}px * ${scale})`,
-        '--sprite-height': `calc(${sheet_height}px * ${scale})`,
-        
-        backgroundImage: `url(${src})`,
+        '--sprite-layer': `${layer * scale * tile_height}px`,
+        '--sprite-last-frame': `-${(tile_width * scale * (frames))}px`,
+
         height: `${tile_height * scale}px`,
         width: `${tile_width * scale}px`,
 
-        backgroundSize: `var(--sprite-length) var(--sprite-height)`,
-        backgroundPositionY: `${layer * tile_height}px`,
+        objectPosition: `0px ${layer * tile_height}px`,
         imageRendering: "pixelated",
+        objectFit: "cover",
 
-        animationName: sprite_animation,
-        animationDuration: `${timing * frames * (1/rate)}s`,
-        animationTimingFunction: `steps(${frames}, end)`,
+        animationName: sprite_animation_image,
+        animationDuration: `${timing * frames * (1 / rate)}s`,
+        animationTimingFunction: `steps(${frames}, start)`,
         animationIterationCount: 'infinite',
-    }),
-    sprite_static: (
-        src: string,
-        tile_width: number,
-        tile_height: number,
-        layer: number,
-        frame: number,
-        scale: number,
-        sheet_width: number,
-        sheet_height: number
-    ) => ({
-        '--sprite-length': `calc(${sheet_width}px * ${scale})`,
-        '--sprite-height': `calc(${sheet_height}px * ${scale})`,
-        
-        backgroundImage: `url(${src})`,
-        height: `${tile_height * scale}px`,
-        width: `${tile_width * scale}px`,
-
-        backgroundSize: `var(--sprite-length) var(--sprite-height)`,
-        backgroundPositionY: `${layer * tile_height}px`,
-        imageRendering: "pixelated",
-        backgroundPositionX: `${tile_width * scale * frame}px`
     })
-});
+})
+
+const rerenders = new Map<string, number>()
 
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
+    const shaders = new Map<string, string>()
+
     const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
         frame_time: .15,
@@ -99,53 +98,122 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         loading: "load",
         ...options
     }
-    
-    const sheet = new Image();
-    let sheet_size = [32, 128]
-    sheet.src = src
-    sheet.onload = () => {
-        sheet_size = [sheet.naturalHeight, sheet.naturalWidth]
+
+    const shader = (id: string, callback: CallableFunction) => {
+        const image = new Image()
+        image.crossOrigin = "anonymous"
+        image.src = src
+
+        image.onload = async () => {
+            const canvas: HTMLCanvasElement | OffscreenCanvas =
+                typeof OffscreenCanvas !== "undefined"
+                    ? new OffscreenCanvas(image.naturalWidth, image.naturalHeight)
+                    : Object.assign(document.createElement("canvas"), {
+                        width: image.naturalWidth,
+                        height: image.naturalHeight
+                    })
+
+            const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
+            if (!ctx || typeof ctx.drawImage !== "function") return;
+
+            ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight)
+            callback(ctx, image.naturalWidth, image.naturalHeight)
+
+            const finalize = (url: string) => {
+                shaders.set(id, url)
+                rerenders.set(id, Date.now())
+            };
+
+            if ("convertToBlob" in canvas) {
+                const blob = await (canvas as OffscreenCanvas).convertToBlob()
+                finalize(URL.createObjectURL(blob))
+            } else {
+                const dataURL = (canvas as HTMLCanvasElement).toDataURL()
+                finalize(dataURL)
+            }
+        };
     }
 
-    return memo(({
-        state = "main", 
+    const Sprite: Sprite = memo(({
+        state = "main",
         alt = "",
         rate = 1,
         scale = 1,
-        tile = 0
+        tile = 1,
+        resizeTo,
+        shader = "",
+        styles
     }) => {
-        switch(opts.structure[state].type) {
+        const [resize_scale, setResizeScale] = useState(1)
+        const imageSrc = 
+            shaders.has(shader)
+                ? shaders.get(shader)
+                : src
+
+        useEffect(() => {
+            
+            if (resizeTo?.current === undefined) return () => {}
+
+            const observer = new ResizeObserver((entries) => {
+                const { width, height } = entries[0].contentRect
+                setResizeScale(
+                    Math.min(width, height) / opts.tile_size[1]
+                )
+            })
+
+            if (resizeTo.current) observer.observe(resizeTo.current);
+
+            return () => {
+                if (resizeTo.current) observer.unobserve(resizeTo.current);
+            }
+        }, [])
+
+        const [_, setTick] = useState(0) //Used to Force Rerenders of the component
+
+        useEffect(() => {
+            const id = setInterval(() => {
+                const modTime = rerenders.get(shader)
+                if (modTime) {
+                    setTick(modTime)
+                    rerenders.delete(shader)
+                }
+            }, 100)
+
+            return () => clearInterval(id)
+        }, [shader])
+
+        switch (opts.structure[state].type) {
             case "animated":
-                return <div
-                    aria-label={alt}
-                    {...props(styles.sprite_animated(
-                        src,
+                return <img
+                    src={imageSrc}
+                    alt-text={alt}
+                    {...props(styles, sprite_styles.sprite_animation_image(
                         opts.tile_size[1],
                         opts.tile_size[0],
                         opts.structure[state].layer,
                         opts.structure[state].length,
                         opts.frame_time,
                         rate,
-                        scale,
-                        sheet_size[1],
-                        sheet_size[0],
+                        resizeTo? resize_scale : scale
                     ))}
                 />
             case "tile":
-                return <div
-                    aria-label={alt}
-                    {...props(styles.sprite_static(
-                        src,
+                return <img
+                    src={imageSrc}
+                    alt-text={alt}
+                    {...props(styles, sprite_styles.sprite_static_image(
                         opts.tile_size[1],
                         opts.tile_size[0],
                         opts.structure[state].layer,
                         tile,
-                        scale,
-                        sheet_size[1],
-                        sheet_size[0],
+                        resizeTo? resize_scale : scale
                     ))}
                 />
         }
-        
+
     })
+
+    return [Sprite, {
+        shader
+    }]
 }
