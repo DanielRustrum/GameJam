@@ -65,6 +65,59 @@ function injectCSS() {
   cssInjected = true;
 }
 
+
+
+
+/**
+ * Creates an interactive Sprite React component and a shader registration utility
+ * to display animated or static spritesheets with rich visual effects.
+ *
+ * This factory function allows you to render sprite-based UI elements,
+ * handle dynamic animations, apply custom shaders, and respond to user interactions.
+ *
+ * @function
+ * @param {string} src - Source URL of the spritesheet image.
+ * @param {Object} options - Configuration object.
+ * @param {[number, number]} options.tile_size - Dimensions [height, width] of a single sprite tile.
+ * @param {number} options.frame_time - Duration (in seconds) of each animation frame.
+ * @param {Object} options.structure - Defines sprite states (animated or static) and frame layouts.
+ * @param {'load'|'preload'|'background'} options.loading - Image loading behavior.
+ * 
+ * @returns {[React.MemoExoticComponent, { shader: Function }]} A tuple containing:
+ *  - Sprite: A React component that renders the sprite and supports props like `state`, `rate`, `scale`,
+ *    `use_shader`, `animation`, event handlers, and native <img> attributes.
+ *  - shader: A utility function to register canvas-based shader effects that can be dynamically applied
+ *    to sprite instances.
+ *
+ * @example
+ * const [Sprite, { shader }] = spritesheet('/spritesheet.png', {
+ *   tile_size: [64, 64],
+ *   frame_time: 0.1,
+ *   structure: {
+ *     main: { type: 'animated', layer: 0, length: 6 },
+ *     idle: { type: 'tile', layer: 1, length: 1 },
+ *   },
+ *   loading: 'load',
+ * });
+ *
+ * // Register a glowing shader effect
+ * shader('glow', (ctx, width, height) => {
+ *   ctx.globalCompositeOperation = 'lighter';
+ *   ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+ *   ctx.fillRect(0, 0, width, height);
+ * });
+ *
+ * // Use the Sprite component in your React tree
+ * <Sprite
+ *   state="main"
+ *   rate={1.5}
+ *   scale={2}
+ *   use_shader="glow"
+ *   animation="bounce 2s ease-in-out infinite"
+ *   alt="Character"
+ *   onClick={() => alert('Sprite clicked!')}
+ * />
+ */
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     const shaders = new Map<string, string>()
     
