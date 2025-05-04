@@ -13,6 +13,7 @@ type Sprite = Component<{
 
     className?: string
     style?: CSSProperties
+    animation?: string;
 } & ImgHTMLAttributes<HTMLImageElement>>
 
 type SpritesheetFunction = (
@@ -56,9 +57,7 @@ function injectCSS() {
       object-fit: cover;
     }
     .sprite.animated {
-      animation-name: spriteAnimation;
-      animation-timing-function: steps(var(--frames), start);
-      animation-iteration-count: infinite;
+      animation: spriteAnimation var(--duration) steps(var(--frames), start) infinite;
     }
   `;
 
@@ -97,7 +96,7 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
             if (!ctx || typeof ctx.drawImage !== "function") return;
 
             ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight)
-            callback(ctx, image.naturalWidth, image.naturalHeight)
+            await callback(ctx, image.naturalWidth, image.naturalHeight)
 
             const finalize = (url: string) => {
                 shaders.set(id, url)
@@ -124,6 +123,8 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
 
         className = "",
         style = {},
+        animation,
+
         ...imgProps
     }) => {
         const [resize_scale, setResizeScale] = useState(1)
@@ -178,7 +179,7 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
           Object.assign(sprite_style, {
             "--sprite-last-frame": `-${opts.tile_size[1] * computedScale * stateConfig.length}px`,
             "--frames": stateConfig.length,
-            animationDuration: `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
+            "--duration": `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
           })
         } else {
           Object.assign(sprite_style, {
@@ -187,6 +188,10 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         }
 
         Object.assign(style, sprite_style)
+
+        style.animation = `spriteAnimation var(--duration) steps(var(--frames), start) infinite${
+            animation ? `, ${animation}` : ""
+        }`
   
         return (
           <img

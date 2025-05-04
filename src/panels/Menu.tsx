@@ -16,24 +16,7 @@ const [Sprite, {shader}] = spritesheet(test_sheet, {
     }
 })
 
-shader("test", (ctx, width, height) => {
-    const imageData = ctx.getImageData(0, 0, width, height)
-    const data = imageData.data
 
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-
-        if (r > 110 && b > 200 && g < 100) {
-            data[i] = 60
-            data[i + 1] = 80
-            data[i + 2] = 70
-        }
-    }
-
-    ctx.putImageData(imageData, 0, 0)
-})
 
 export const RateAnimated = memo(() => {
     const [rate, setRate] = useState(1)
@@ -64,7 +47,7 @@ export const ScaleAnimated = memo(() => {
         <Slider
             defaultValue={[1]}
             min={.5}
-            max={2}
+            max={5}
             step={.1}
             className="w-50"
             onValueChange={value => {
@@ -84,7 +67,7 @@ export const ScaleStatic = memo(() => {
         <Slider
             defaultValue={[1]}
             min={.5}
-            max={2}
+            max={5}
             step={.1}
             className="w-50"
             onValueChange={value => {
@@ -139,6 +122,50 @@ export const ResizeAnimated = () => {
     )
 }
 
+
+shader("test", (ctx, width, height) => {
+    const imageData = ctx.getImageData(0, 0, width, height)
+    const data = imageData.data
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+
+        if (r > 110 && b > 200 && g < 100) {
+            data[i] = 60
+            data[i + 1] = 80
+            data[i + 2] = 70
+        }
+    }
+
+    ctx.putImageData(imageData, 0, 0)
+})
+
+export const ShaderExample = () => {
+    return <div className="flex gap-10 items-center">
+        <p className="text-m font-bold">Shader: </p>
+        <Sprite state="main" use_shader="test" scale={3}/>
+    </div>
+}
+
+export const AnimationExample = () => {
+    return <div className="flex gap-10 items-center">
+        <style>{`
+            @keyframes bounce {
+                0% {
+                    filter: hue-rotate(0deg);
+                }
+                100% {
+                    filter: hue-rotate(360deg);
+                }
+            }`}
+        </style>
+        <p className="text-m font-bold">Animation: </p>
+        <Sprite state="main" animation="bounce 10s ease-in-out infinite" scale={3}/>
+    </div>
+}
+
 export const Panel = () =>{ 
     const navigate = usePanelNavigation()
     return <>
@@ -153,7 +180,8 @@ export const Panel = () =>{
         <ScaleStatic />
         <HueChangeStatic />
         <ResizeAnimated />
-        <Sprite state="main" use_shader="test" scale={3}/>
+        <ShaderExample />
+        <AnimationExample />
     </>
 }
 
