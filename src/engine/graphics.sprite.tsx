@@ -1,19 +1,19 @@
-import { memo, RefObject, useEffect, useState } from "react";
+import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useState } from "react";
 import { Component } from "../types/component";
 import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
-import { create, keyframes, props, StyleXStyles } from "@stylexjs/stylex";
 
 
 type Sprite = Component<{
     state: string
-    alt?: string
     rate?: number
     tile?: number
     scale?: number
-    styles?: StyleXStyles
-    shader?: string
     resizeTo?: RefObject<HTMLElement>
-}>
+    use_shader?: string
+
+    className?: string
+    style?: CSSProperties
+} & ImgHTMLAttributes<HTMLImageElement>>
 
 type SpritesheetFunction = (
     src: string,
@@ -40,56 +40,36 @@ type SpritesheetFunction = (
     shader: (id: string, callback: (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) => void) => void
 }]
 
-const sprite_animation_image = keyframes({
-    '100%': { objectPosition: `0px var(--sprite-layer)` },
-    '0%': { objectPosition: `var(--sprite-last-frame) var(--sprite-layer)` },
-})
-
-const sprite_styles = create({
-    sprite_static_image: (
-        tile_width: number,
-        tile_height: number,
-        layer: number,
-        frame: number,
-        scale: number,
-    ) => ({
-        height: `${tile_height * scale}px`,
-        width: `${tile_width * scale}px`,
-
-        objectPosition: `-${tile_width * scale * (frame - 1)}px ${layer * scale * tile_height}px`,
-        imageRendering: "pixelated",
-        objectFit: "cover",
-    }),
-    sprite_animation_image: (
-        tile_width: number,
-        tile_height: number,
-        layer: number,
-        frames: number,
-        timing: number,
-        rate: number,
-        scale: number,
-    ) => ({
-        '--sprite-layer': `${layer * scale * tile_height}px`,
-        '--sprite-last-frame': `-${(tile_width * scale * (frames))}px`,
-
-        height: `${tile_height * scale}px`,
-        width: `${tile_width * scale}px`,
-
-        objectPosition: `0px ${layer * tile_height}px`,
-        imageRendering: "pixelated",
-        objectFit: "cover",
-
-        animationName: sprite_animation_image,
-        animationDuration: `${timing * frames * (1 / rate)}s`,
-        animationTimingFunction: `steps(${frames}, start)`,
-        animationIterationCount: 'infinite',
-    })
-})
-
 const rerenders = new Map<string, number>()
+
+let cssInjected = false;
+function injectCSS() {
+  if (cssInjected) return;
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes spriteAnimation {
+      0% { object-position: var(--sprite-last-frame) var(--sprite-layer); }
+      100% { object-position: 0px var(--sprite-layer); }
+    }
+    .sprite {
+      image-rendering: pixelated;
+      object-fit: cover;
+    }
+    .sprite.animated {
+      animation-name: spriteAnimation;
+      animation-timing-function: steps(var(--frames), start);
+      animation-iteration-count: infinite;
+    }
+  `;
+
+  document.head.appendChild(style);
+  cssInjected = true;
+}
 
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     const shaders = new Map<string, string>()
+    
+    injectCSS()
 
     const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
@@ -136,19 +116,18 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
 
     const Sprite: Sprite = memo(({
         state = "main",
-        alt = "",
         rate = 1,
         scale = 1,
         tile = 1,
         resizeTo,
-        shader = "",
-        styles
+        use_shader = "",
+
+        className = "",
+        style = {},
+        ...imgProps
     }) => {
         const [resize_scale, setResizeScale] = useState(1)
-        const imageSrc = 
-            shaders.has(shader)
-                ? shaders.get(shader)
-                : src
+        const imageSrc = shaders.get(use_shader) || src
 
         useEffect(() => {
             
@@ -168,48 +147,55 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
             }
         }, [])
 
-        const [_, setTick] = useState(0) //Used to Force Rerenders of the component
+        const [_, setTick] = useState(0) //? Used to Force Rerenders of the Component
 
         useEffect(() => {
             const id = setInterval(() => {
-                const modTime = rerenders.get(shader)
+                const modTime = rerenders.get(use_shader)
                 if (modTime) {
                     setTick(modTime)
-                    rerenders.delete(shader)
+                    rerenders.delete(use_shader)
                 }
             }, 100)
 
             return () => clearInterval(id)
-        }, [shader])
+        }, [use_shader])
+        
 
-        switch (opts.structure[state].type) {
-            case "animated":
-                return <img
-                    src={imageSrc}
-                    alt-text={alt}
-                    {...props(styles, sprite_styles.sprite_animation_image(
-                        opts.tile_size[1],
-                        opts.tile_size[0],
-                        opts.structure[state].layer,
-                        opts.structure[state].length,
-                        opts.frame_time,
-                        rate,
-                        resizeTo? resize_scale : scale
-                    ))}
-                />
-            case "tile":
-                return <img
-                    src={imageSrc}
-                    alt-text={alt}
-                    {...props(styles, sprite_styles.sprite_static_image(
-                        opts.tile_size[1],
-                        opts.tile_size[0],
-                        opts.structure[state].layer,
-                        tile,
-                        resizeTo? resize_scale : scale
-                    ))}
-                />
+        const stateConfig = opts.structure[state]
+        const computedScale = resizeTo ? resize_scale : scale
+        const height = opts.tile_size[0] * computedScale
+        const width = opts.tile_size[1] * computedScale
+        const layer = stateConfig.layer * computedScale * opts.tile_size[0]
+  
+        const sprite_style: React.CSSProperties = {
+          height,
+          width,
+          "--sprite-layer": `${layer}px`,
+        } as React.CSSProperties
+  
+        if (stateConfig.type === "animated") {
+          Object.assign(sprite_style, {
+            "--sprite-last-frame": `-${opts.tile_size[1] * computedScale * stateConfig.length}px`,
+            "--frames": stateConfig.length,
+            animationDuration: `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
+          })
+        } else {
+          Object.assign(sprite_style, {
+            objectPosition: `-${opts.tile_size[1] * computedScale * (tile - 1)}px ${layer}px`,
+          })
         }
+
+        Object.assign(style, sprite_style)
+  
+        return (
+          <img
+            {...imgProps}
+            src={imageSrc}
+            style={style}
+            className={`${className} sprite ${stateConfig.type === "animated" ? "animated" : ""}`}
+          />
+        )
 
     })
 

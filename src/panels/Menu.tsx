@@ -5,7 +5,6 @@ import { Slider } from "@/components/UI/slider"
 
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'
 import { memo, useRef, useState } from "react"
-import { create } from "@stylexjs/stylex"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/UI/resizable"
 
 const [Sprite, {shader}] = spritesheet(test_sheet, {
@@ -35,9 +34,6 @@ shader("test", (ctx, width, height) => {
 
     ctx.putImageData(imageData, 0, 0)
 })
-
-const styles_test = create({ container: (degree) => ({ filter: `hue-rotate(${degree}deg)` }) })
-
 
 export const RateAnimated = memo(() => {
     const [rate, setRate] = useState(1)
@@ -104,7 +100,7 @@ export const HueChangeStatic = memo(() => {
     
     return <div className="flex gap-10 items-center">
         <p className="text-m font-bold">Change Hue: </p>
-        <Sprite state="tile"  styles={styles_test.container(hue)}/>
+        <Sprite state="tile" style={{ filter: `hue-rotate(${hue}deg)` }} />
         <Slider
             defaultValue={[0]}
             min={0}
@@ -157,7 +153,7 @@ export const Panel = () =>{
         <ScaleStatic />
         <HueChangeStatic />
         <ResizeAnimated />
-        <Sprite state="main" shader="test" scale={3}/>
+        <Sprite state="main" use_shader="test" scale={3}/>
     </>
 }
 
