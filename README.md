@@ -121,3 +121,4 @@ const Example = () => {
 - [ ] Demo Site
 - [ ] Build From Scratch Sprites
 - [ ] Background Sprites
+- [ ] Sprite Stacks (Component For Managing Stacks of Sprites)
