@@ -120,3 +120,4 @@ const Example = () => {
 - [ ] Ratio Resizing Algorithm for Rectangular Sprite Sheets
 - [ ] Demo Site
 - [ ] Build From Scratch Sprites
+- [ ] Background Sprites
