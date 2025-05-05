@@ -115,10 +115,12 @@ const Example = () => {
 
 ### Sprites Roadmap
 - [ ] Flexible Sprite Sheet Structure
-- [ ] Image Preloading and Background Loading
+- [ ] Image Preloading, Background Loading, and Streaming Image Data
 - [ ] Compute Shader in Web worker
 - [ ] Ratio Resizing Algorithm for Rectangular Sprite Sheets
 - [ ] Demo Site
-- [ ] Build From Scratch Sprites
+- [ ] Blank Spritesheets
 - [ ] Background Sprites
 - [ ] Sprite Stacks (Component For Managing Stacks of Sprites)
+- [ ] Single Tile Sheets for Default
+- [ ] Computation Caching

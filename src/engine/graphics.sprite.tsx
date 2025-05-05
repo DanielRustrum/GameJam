@@ -1,4 +1,4 @@
-import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useState } from "react";
+import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useRef, useState } from "react";
 import { Component } from "../types/component";
 import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
 
@@ -10,8 +10,8 @@ type Sprite = Component<{
     scale?: number
     resizeTo?: RefObject<HTMLElement>
     use_shader?: string
+    paused?: boolean
 
-    className?: string
     style?: CSSProperties
     animation?: string;
 } & ImgHTMLAttributes<HTMLImageElement>>
@@ -35,34 +35,23 @@ type SpritesheetFunction = (
                 length: number
             }
         }
-        loading: "load" | "preload" | "background"
+        loading: "load" | "preload" | "background" | "lazy"
     }>
 ) => [Sprite, {
     shader: (id: string, callback: (ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) => void) => void
 }]
 
-const rerenders = new Map<string, number>()
 
-let cssInjected = false;
-function injectCSS() {
-  if (cssInjected) return;
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes spriteAnimation {
-      0% { object-position: var(--sprite-last-frame) var(--sprite-layer); }
-      100% { object-position: 0px var(--sprite-layer); }
-    }
-    .sprite {
-      image-rendering: pixelated;
-      object-fit: cover;
-    }
-    .sprite.animated {
-      animation: spriteAnimation var(--duration) steps(var(--frames), start) infinite;
-    }
-  `;
-
-  document.head.appendChild(style);
-  cssInjected = true;
+if(document.querySelector("[data-sprite-animation]") === null) {
+    const style = document.createElement("style")
+    style.textContent = `
+        @keyframes spriteAnimation {
+            0% { object-position: var(--sprite-last-frame) var(--sprite-layer); }
+            100% { object-position: 0px var(--sprite-layer); }
+        }
+    `
+    style.setAttribute("data-sprite-animation", "")
+    document.head.appendChild(style)
 }
 
 
@@ -120,8 +109,8 @@ function injectCSS() {
  */
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     const shaders = new Map<string, string>()
+    const rerenders = new Map<string, number>()
     
-    injectCSS()
 
     const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
@@ -131,12 +120,16 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         ...options
     }
 
-    const shader = (id: string, callback: CallableFunction) => {
-        const image = new Image()
-        image.crossOrigin = "anonymous"
-        image.src = src
+    const image = new Image()
+    image.crossOrigin = "anonymous"
+    image.src = src
 
-        image.onload = async () => {
+    if (opts.loading === "preload" && image.decode) {
+        image.decode().catch(() => {});  //? decode without blocking
+    }
+
+    const shader = (id: string, callback: CallableFunction) => {
+        const render = async () => {
             const canvas: HTMLCanvasElement | OffscreenCanvas =
                 typeof OffscreenCanvas !== "undefined"
                     ? new OffscreenCanvas(image.naturalWidth, image.naturalHeight)
@@ -163,7 +156,12 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
                 const dataURL = (canvas as HTMLCanvasElement).toDataURL()
                 finalize(dataURL)
             }
-        };
+        }
+
+        if (image.complete)
+            render();
+        else
+            image.onload = render;
     }
 
     const Sprite: Sprite = memo(({
@@ -173,19 +171,38 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         tile = 1,
         resizeTo,
         use_shader = "",
+        paused = false,
 
-        className = "",
         style = {},
         animation,
+        children,
 
         ...imgProps
     }) => {
         const [resize_scale, setResizeScale] = useState(1)
-        const imageSrc = shaders.get(use_shader) || src
-
+        const imgRef = useRef<HTMLImageElement>(null)
+        const [isInView, setIsInView] = useState(opts.loading !== "lazy");
+        const imageSrc = use_shader !== ""? shaders.get(use_shader): image.src
+        
+        //* Lazy Loading Control
         useEffect(() => {
-            
-            if (resizeTo?.current === undefined) return () => {}
+            if (opts.loading !== "lazy" || !imgRef.current) return;
+    
+            const observer = new IntersectionObserver(([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsInView(true)
+                    observer.disconnect()
+                }
+            })
+    
+            observer.observe(imgRef.current)
+    
+            return () => observer.disconnect()
+        }, [])
+
+        //* Resize Control
+        useEffect(() => {
+            if (resizeTo?.current === undefined) return () => {};
 
             const observer = new ResizeObserver((entries) => {
                 const { width, height } = entries[0].contentRect
@@ -201,14 +218,18 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
             }
         }, [])
 
+        //* Rerender Control
         const [_, setTick] = useState(0) //? Used to Force Rerenders of the Component
-
         useEffect(() => {
+            if(paused) return;
+
             const id = setInterval(() => {
                 const modTime = rerenders.get(use_shader)
                 if (modTime) {
                     setTick(modTime)
-                    rerenders.delete(use_shader)
+                    setTimeout(() => {
+                        rerenders.delete(use_shader)
+                    }, 100)
                 }
             }, 100)
 
@@ -221,40 +242,43 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         const height = opts.tile_size[0] * computedScale
         const width = opts.tile_size[1] * computedScale
         const layer = stateConfig.layer * computedScale * opts.tile_size[0]
-  
+
+        if(imageSrc === undefined && isInView)
+            return <div style={{width: width, height: height}}>{children}</div>;
+        
         const sprite_style: React.CSSProperties = {
-          height,
-          width,
-          "--sprite-layer": `${layer}px`,
+            height,
+            width,
+            imageRendering: "pixelated",
+            objectFit: "cover",
+            "--sprite-layer": `${layer}px`,
         } as React.CSSProperties
   
-        if (stateConfig.type === "animated") {
-          Object.assign(sprite_style, {
-            "--sprite-last-frame": `-${opts.tile_size[1] * computedScale * stateConfig.length}px`,
-            "--frames": stateConfig.length,
-            "--duration": `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
-          })
-        } else {
-          Object.assign(sprite_style, {
-            objectPosition: `-${opts.tile_size[1] * computedScale * (tile - 1)}px ${layer}px`,
-          })
-        }
+        if (stateConfig.type === "animated")
+            Object.assign(sprite_style, {
+                "--sprite-last-frame": `-${opts.tile_size[1] * computedScale * stateConfig.length}px`,
+                "--frames": stateConfig.length,
+                "--duration": `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
+                animation: `spriteAnimation var(--duration) steps(var(--frames), start) infinite${animation ? `, ${animation}` : ""}`
+            });
+        else
+            Object.assign(sprite_style, { 
+                objectPosition: `-${opts.tile_size[1] * computedScale * (tile - 1)}px ${layer}px` 
+            });
+
 
         Object.assign(style, sprite_style)
-
-        style.animation = `spriteAnimation var(--duration) steps(var(--frames), start) infinite${
-            animation ? `, ${animation}` : ""
-        }`
   
         return (
           <img
             {...imgProps}
-            src={imageSrc}
+            src={isInView ? imageSrc : undefined}
+            width={width}
+            height={height}
+            ref={imgRef}
             style={style}
-            className={`${className} sprite ${stateConfig.type === "animated" ? "animated" : ""}`}
           />
         )
-
     })
 
     return [Sprite, {

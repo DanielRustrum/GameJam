@@ -117,35 +117,41 @@ export const ResizeAnimated = () => {
                         <Sprite state="main" resizeTo={Element_Ref}/>
                     </div>
                 </ResizablePanel>
-                </ResizablePanelGroup>
+            </ResizablePanelGroup>
         </>
     )
 }
 
-
-shader("test", (ctx, width, height) => {
-    const imageData = ctx.getImageData(0, 0, width, height)
-    const data = imageData.data
-
-    for (let i = 0; i < data.length; i += 4) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-
-        if (r > 110 && b > 200 && g < 100) {
-            data[i] = 60
-            data[i + 1] = 80
-            data[i + 2] = 70
+setTimeout(() => {
+    shader("test", (ctx, width, height) => {
+        const imageData = ctx.getImageData(0, 0, width, height)
+        const data = imageData.data
+    
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i]
+            const g = data[i + 1]
+            const b = data[i + 2]
+    
+            if (r > 110 && b > 200 && g < 100) {
+                data[i] = 60
+                data[i + 1] = 80
+                data[i + 2] = 70
+            }
         }
-    }
-
-    ctx.putImageData(imageData, 0, 0)
-})
+    
+        ctx.putImageData(imageData, 0, 0)
+    })
+}, 2000)
 
 export const ShaderExample = () => {
     return <div className="flex gap-10 items-center">
         <p className="text-m font-bold">Shader: </p>
-        <Sprite state="main" use_shader="test" scale={3}/>
+        <Sprite state="main" use_shader="test" scale={3}>
+            <div className="w-full h-full flex justify-center items-center"><p>Spinner</p></div>
+        </Sprite>
+        <Sprite state="main" use_shader="test" scale={3}>
+            <div className="w-full h-full flex justify-center items-center"><p>Spinner</p></div>
+        </Sprite>
     </div>
 }
 
@@ -161,7 +167,7 @@ export const AnimationExample = () => {
                 }
             }`}
         </style>
-        <p className="text-m font-bold">Animation: </p>
+        <p className="text-m font-bold">Added CSS Animation: </p>
         <Sprite state="main" animation="bounce 10s ease-in-out infinite" scale={3}/>
     </div>
 }
@@ -169,13 +175,13 @@ export const AnimationExample = () => {
 export const Panel = () =>{ 
     const navigate = usePanelNavigation()
     return <>
-        <p className="text-4xl font-bold">Sprite Test</p>
+        <p className="text-4xl font-bold text-center">Sprite/Sprite Sheet Demo</p>
         <Button onClick={() => navigate("test")}>Navigate to Test</Button>
-        <p className="text-xl font-bold">Animation</p>
+        <p className="text-xl font-bold text-center">Animation</p>
         <Sprite state="main" />
         <RateAnimated />
         <ScaleAnimated />
-        <p className="text-xl font-bold">Static</p>
+        <p className="text-xl font-bold text-center">Static</p>
         <Sprite state="tile" tile={2} />
         <ScaleStatic />
         <HueChangeStatic />
