@@ -1,178 +1,176 @@
-type MessageEnvelope<T> = {
-    requestId: string;
-    payload: T;
-};
-
-function workerBootstrap<MainToWorker, WorkerToMain>(
-    workerFn: (api: {
-        send: (message: WorkerToMain, requestId?: string) => void;
-        receive: (timeoutMs?: number, signal?: AbortSignal) => Promise<MessageEnvelope<MainToWorker>>;
-        poll: () => MessageEnvelope<MainToWorker> | undefined;
-        stop: () => void;
-    }) => void
-) {
-    const messageQueue: MessageEnvelope<MainToWorker>[] = [];
-    const pendingReceivers: ((value: MessageEnvelope<MainToWorker>) => void)[] = [];
-    const swSelf = self as unknown as ServiceWorkerGlobalScope;
-
-    function send(message: WorkerToMain, requestId?: string) {
-        swSelf.clients.matchAll().then(clients => {
-            clients.forEach(client => client.postMessage({ requestId, payload: message }));
-        });
-    }
-
-    function receive(timeoutMs?: number, signal?: AbortSignal): Promise<MessageEnvelope<MainToWorker>> {
-        if (messageQueue.length > 0) {
-            const value = messageQueue.shift()
-            if(value !== undefined) return Promise.resolve(value);
-        }
-        return new Promise((resolve, reject) => {
-            const receiver = (msg: MessageEnvelope<MainToWorker>) => resolve(msg);
-            pendingReceivers.push(receiver);
-
-            if (timeoutMs) {
-                setTimeout(() => {
-                    const index = pendingReceivers.indexOf(receiver);
-                    if (index !== -1) pendingReceivers.splice(index, 1);
-                    reject(new Error('Receive timeout'));
-                }, timeoutMs);
-            }
-
-            if (signal) {
-                signal.addEventListener('abort', () => {
-                    const index = pendingReceivers.indexOf(receiver);
-                    if (index !== -1) pendingReceivers.splice(index, 1);
-                    reject(new Error('Receive aborted'));
-                });
-            }
-        });
-    }
-
-    function poll() {
-        return messageQueue.shift();
-    }
-
-    function stop() {
-        swSelf.registration.unregister().then(() => {
-            self.close();
-        });
-    }
-
-    swSelf.addEventListener('message', event => {
-        if (pendingReceivers.length > 0) {
-            const resolver = pendingReceivers.shift();
-            if (resolver) resolver(event.data);
-        } else {
-            messageQueue.push(event.data);
-        }
-    });
-
-    workerFn({ send, receive, poll, stop });
-}
-
+/**
+ * Creates a dynamic, type-safe service worker with bi-directional communication.
+ * 
+ * This utility provides send, receive, poll, stop, and reactive onMessage APIs 
+ * for both the main thread and the worker, allowing you to write Go-style 
+ * message handling in TypeScript.
+ * 
+ * @template MainToWorker Type of messages sent from main thread to worker
+ * @template WorkerToMain Type of messages sent from worker to main thread
+ * 
+ * @param {(api: {
+*   send: (message: WorkerToMain) => void;
+*   receive: () => Promise<MainToWorker>;
+*   poll: () => MainToWorker | undefined;
+*   stop: () => void;
+*   onMessage: (callback: (msg: MainToWorker) => void) => () => void;
+* }) => void} workerFn The worker function, which receives an API object
+* and runs inside the service worker.
+* 
+* @returns {
+*  [ run: () => Promise<void>;
+* {
+*   send: (message: MainToWorker) => void;
+*   receive: () => Promise<WorkerToMain>;
+*   poll: () => WorkerToMain | undefined;
+*   stop: () => Promise<void>;
+*   onMessage: (callback: (msg: WorkerToMain) => void) => () => void;
+* }]}
+* An object containing methods for controlling the worker from the main thread.
+*/
 export function addWorkerFunction<MainToWorker, WorkerToMain>(
     workerFn: (
         api: {
-            send: (message: WorkerToMain, requestId?: string) => void;
-            receive: (timeoutMs?: number, signal?: AbortSignal) => Promise<MessageEnvelope<MainToWorker>>;
-            poll: () => MessageEnvelope<MainToWorker> | undefined;
-            stop: () => void;
+            send: (message: WorkerToMain) => void
+            receive: () => Promise<MainToWorker>
+            poll: () => MainToWorker | undefined
+            stop: () => void
+            subscribe: (callback: (msg: MainToWorker) => void) => () => void
         }
     ) => void
-): {
-    run: () => Promise<void>;
-    send: (message: MainToWorker) => Promise<MessageEnvelope<WorkerToMain>>
-    receive: (timeoutMs?: number, signal?: AbortSignal) => Promise<MessageEnvelope<WorkerToMain>>
-    poll: () => MessageEnvelope<WorkerToMain> | undefined
-    stop: () => Promise<void>
-} {
-    if (!('serviceWorker' in navigator)) {
-        throw new Error('Service Workers are not supported in this browser.');
+):[ 
+    start: () => Promise<void>, 
+    {
+       send: (message: MainToWorker) => void
+       receive: () => Promise<WorkerToMain>
+       poll: () => WorkerToMain | undefined
+       stop: () => void
+       subscribe: (callback: (msg: WorkerToMain) => void) => () => void
+    }
+] {
+    const workerBootstrap = function <MainToWorker, WorkerToMain>(
+        workerFn: (
+            api: {
+                send: (message: WorkerToMain) => void
+                receive: () => Promise<MainToWorker>
+                poll: () => MainToWorker | undefined
+                stop: () => void
+                subscribe: (callback: (msg: MainToWorker) => void) => () => void
+            }
+        ) => void
+    ) {
+        const messageQueue: MainToWorker[] = []
+        const pendingReceivers: ((value: MainToWorker) => void)[] = []
+
+        function send(message: WorkerToMain) {
+            postMessage(message)
+        }
+
+        function receive(): Promise<MainToWorker> {
+            if (messageQueue.length > 0) {
+                const value = messageQueue.shift()
+                if (value !== undefined) return Promise.resolve(value);
+            }
+            return new Promise(resolve => {
+                pendingReceivers.push(resolve)
+            });
+        }
+
+        function poll() {
+            return messageQueue.shift()
+        }
+
+        function subscribe(callback: (msg: MainToWorker) => void) {
+            const handler = (event: MessageEvent) => {
+                callback(event.data as MainToWorker)
+            };
+            self.addEventListener('message', handler)
+            return () => self.removeEventListener('message', handler)
+        }
+
+        function stop() {
+            close()
+        }
+
+        self.addEventListener('message', event => {
+            const msg = event.data as MainToWorker
+
+            if (pendingReceivers.length > 0) {
+                const resolver = pendingReceivers.shift()
+                if (resolver) resolver(msg);
+            } else {
+                messageQueue.push(msg)
+            }
+        })
+
+        workerFn({ send, receive, poll, stop, subscribe })
     }
 
     const workerCode = `(${workerBootstrap.toString()})(${workerFn.toString()})`
+    const workerUrl = URL.createObjectURL(
+        new Blob([workerCode], { type: 'application/javascript' })
+    )
 
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
+    let worker: null | Worker = null
+    const messageQueue: WorkerToMain[] = []
+    const pendingReceivers: ((value: WorkerToMain) => void)[] = []
 
-    let currentWorker: ServiceWorkerRegistration | null = null;
-    const messageQueue: MessageEnvelope<WorkerToMain>[] = [];
-    const pendingReceivers: ((value: MessageEnvelope<WorkerToMain>) => void)[] = [];
-    const pendingRequests = new Map<string, (value: MessageEnvelope<WorkerToMain>) => void>();
+    const send = (message: MainToWorker): void => {
+        if(worker === null) return;
+        
+        worker.postMessage(message)
+    }
 
-    navigator.serviceWorker.addEventListener('message', (event) => {
-        const envelope = event.data as MessageEnvelope<WorkerToMain>;
-        const resolver = pendingRequests.get(envelope.requestId);
-        if (resolver) {
-            resolver(envelope);
-            pendingRequests.delete(envelope.requestId);
-        } else if (pendingReceivers.length > 0) {
-            const receiver = pendingReceivers.shift();
-            if (receiver) receiver(envelope);
-        } else {
-            messageQueue.push(envelope);
-        }
-    });
-
-    const run = async (): Promise<void> => {
-        currentWorker = await navigator.serviceWorker.register(swUrl);
-        console.log('✅ Worker registered:', currentWorker);
-    };
-
-    const send = (message: MainToWorker): Promise<MessageEnvelope<WorkerToMain>> => {
-        if (!currentWorker) throw new Error('Worker not registered. Call run() first.');
-        const requestId = crypto.randomUUID();
-        return new Promise((resolve, reject) => {
-            pendingRequests.set(requestId, resolve);
-            navigator.serviceWorker.ready.then((reg) => {
-                const sw = reg.active;
-                if (!sw) throw new Error('No active service worker to send message to.');
-                sw.postMessage({ requestId, payload: message });
-            }).catch((err) => {
-                pendingRequests.delete(requestId);
-                reject(err);
-            });
-        });
-    };
-
-    const receive = async (timeoutMs?: number, signal?: AbortSignal): Promise<MessageEnvelope<WorkerToMain>> => {
+    const receive = async (): Promise<WorkerToMain> => {
         if (messageQueue.length > 0) {
-            return messageQueue.shift()!;
+            return messageQueue.shift()!
         }
-        return new Promise((resolve, reject) => {
-            const receiver = (msg: MessageEnvelope<WorkerToMain>) => resolve(msg);
-            pendingReceivers.push(receiver);
+        return new Promise(resolve => {
+            pendingReceivers.push(resolve)
+        })
+    }
 
-            if (timeoutMs) {
-                setTimeout(() => {
-                    const index = pendingReceivers.indexOf(receiver);
-                    if (index !== -1) pendingReceivers.splice(index, 1);
-                    reject(new Error('Receive timeout'));
-                }, timeoutMs);
+    const poll = (): WorkerToMain | undefined => {
+        return messageQueue.shift()
+    }
+
+    const subscribe = (callback: (msg: WorkerToMain) => void): (() => void) => {
+        if(worker === null) throw new Error("Run Not Called");
+
+        const handler = (event: MessageEvent) => {
+            const message = event.data as WorkerToMain
+            callback(message)
+        };
+        worker.addEventListener('message', handler)
+        return () => {
+            if(worker === null) throw new Error("Run Not Called; How did you even get this far?");
+        
+            worker.removeEventListener('message', handler)
+        }
+    }
+
+    const stop = (): void => {
+        if(worker === null) throw new Error("Run Not Called");
+        
+        worker.terminate()
+        messageQueue.length = 0
+        pendingReceivers.length = 0
+    }
+
+   
+
+    const start = async (): Promise<void> => {
+        worker = new Worker(workerUrl)
+        worker.addEventListener('message', (event: MessageEvent) => {
+            const message = event.data as WorkerToMain
+            if (pendingReceivers.length > 0) {
+                const resolver = pendingReceivers.shift()
+                if (resolver) resolver(message);
+            } else {
+                messageQueue.push(message)
             }
+        })
+    }
 
-            if (signal) {
-                signal.addEventListener('abort', () => {
-                    const index = pendingReceivers.indexOf(receiver);
-                    if (index !== -1) pendingReceivers.splice(index, 1);
-                    reject(new Error('Receive aborted'));
-                });
-            }
-        });
-    };
-
-    const poll = (): MessageEnvelope<WorkerToMain> | undefined => {
-        return messageQueue.shift();
-    };
-
-    const stop = async (): Promise<void> => {
-        if (!currentWorker) return;
-        await currentWorker.unregister();
-        currentWorker = null;
-        messageQueue.length = 0;
-        pendingReceivers.length = 0;
-        console.log('🛑 Worker unregistered and stopped from main thread');
-    };
-
-    return { run, send, receive, poll, stop };
+    return [start, { send, receive, poll, stop, subscribe }]
 }

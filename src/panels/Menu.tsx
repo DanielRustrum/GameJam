@@ -177,6 +177,7 @@ export const Panel = () =>{
     return <>
         <p className="text-4xl font-bold text-center">Sprite/Sprite Sheet Demo</p>
         <Button onClick={() => navigate("test")}>Navigate to Test</Button>
+        <Button onClick={() => navigate("worker")}>Navigate to Worker</Button>
         <p className="text-xl font-bold text-center">Animation</p>
         <Sprite state="main" />
         <RateAnimated />
