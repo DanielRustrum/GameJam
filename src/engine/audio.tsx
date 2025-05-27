@@ -1,7 +1,7 @@
 import {Howl} from 'howler';
 import { Gt as GreaterThan, Lt as LessThan } from "ts-arithmetic";
 import { localStore } from './state';
-import { timer } from './update';
+import { timer } from './animation.timing';
 import { createImportMap } from './utils';
 
 const effects = createImportMap(import.meta.glob(

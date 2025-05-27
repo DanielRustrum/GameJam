@@ -1,7 +1,6 @@
 import { RefObject, useEffect, useRef, useState } from "react"
 import { addWorker } from "@/engine/worker"
 
-// Ensure a single instance across hot reloads
 const [start, { subscribe, send }] = addWorker<string, [string, string], {message: string}>(({ subscribe, send, data }) => {
     subscribe(msg => {
         setTimeout(() => {
