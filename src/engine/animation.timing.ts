@@ -22,7 +22,7 @@ export const tick: AnimationLoopFunction = ({
         }
 
         onTick(timestamp)
-
+ 
         if (endCondition !== undefined && endCondition(timestamp)) {
             if (onEnd !== undefined) onEnd();
         } else {
@@ -72,7 +72,7 @@ export const timer = (
             if (delta >= significant_figure) {
                 current_time -= delta
                 last_tick_time = timestamp
-                const rounded_time = Math.floor(Math.max(current_time, 0) / significant_figure) * significant_figure
+                const rounded_time = Math.round(Math.max(current_time, 0) / significant_figure) * significant_figure
                 if (onUpdate) onUpdate(rounded_time)
             }
         },

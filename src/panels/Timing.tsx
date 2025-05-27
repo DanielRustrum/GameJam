@@ -1,22 +1,23 @@
-import { interpolate, timer } from "@/engine/animation.timing"
-import { CSSProperties, useState } from "react"
+import { interpolate } from "@/engine/animation.timing"
+import { useTimer } from "@/engine/animation.timing.react"
+import { CSSProperties, useRef, useState } from "react"
 
 export const Panel = () => {
-    const [time, setTime] = useState(1000)
     const [position, setPosition] = useState(0)
-    
-    const test_timer = timer(10000, 1000, (rem) => setTime(rem))
-    const box_animation = interpolate({
-        range: [0, 500],
-        significant_figure: 10,
-        onUpdate: (step) => {
-            setPosition(step)
-        }
-    })
 
-    box_animation.seek(500)
+    const dur = 12000
+    const sig = 100
+    const [time, {start, set}] = useTimer(dur, sig)
 
-    const boxStyle:CSSProperties = {
+    const animationRef = useRef(
+        interpolate({
+            range: [0, 500],
+            significant_figure: 10,
+            onUpdate: (step) => setPosition(step)
+        })
+    )
+
+    const boxStyle: CSSProperties = {
         backgroundColor: "red",
         position: "relative",
         top: "300px",
@@ -25,12 +26,19 @@ export const Panel = () => {
         height: "100px"
     }
 
-    return <div>
-        <p>{time}</p>
-        <button onClick={() => test_timer.start()}>Start</button>
-        <button onClick={() => box_animation.start()}>Start Animation</button>
-        <div style={boxStyle}></div>
-    </div>
+    return (
+        <div>
+            <p>{dur}: {sig}: {time}</p>
+            <button onClick={() => {
+                set(10000)
+                start()
+            }}>Start Timer</button>
+            <button onClick={() => animationRef.current.start()}>Start Animation</button>
+            <button onClick={() => animationRef.current.seek(250)}>Seek Animation</button>
+            <div style={boxStyle}></div>
+        </div>
+    )
 }
+
 
 export const name = "timing"
