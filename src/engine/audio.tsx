@@ -1,119 +1,140 @@
-import {Howl} from 'howler';
-import { Gt as GreaterThan, Lt as LessThan } from "ts-arithmetic";
+import { Howl } from 'howler';
 import { localStore } from './state';
-import { timer } from './animation.timing';
-import { createImportMap } from './utils';
-
-const effects = createImportMap(import.meta.glob(
-    '@assets/sounds/effects/*?url',
-    {eager: true}
-))
-
-const musics = createImportMap(import.meta.glob(
-    '@assets/sounds/music/*?url',
-    {eager: true}
-))
-
-const ambiences = createImportMap(import.meta.glob(
-    '@assets/sounds/ambiences/*?url',
-    {eager: true}
-))
-
-
-const transitionVolume = (
-    source: Howl, 
-    transition_to: number, 
-    options?:{
-        step?: number
-        onEnd?: () => void
-    }
-) => {
-    let current_volume = parseFloat(source.volume().toFixed(2))
-    const direction = current_volume > transition_to? -1: 1
-    const step = (options?.step ?? 0.10)
-
-    return timer(
-        10000, 
-        step, 
-        (time) => {
-            current_volume += direction * step
-            console.log(direction, current_volume, step, direction)
-            console.log(time)
-            // source.volume(current_volume)
-        }
-    )
-
-}
+import { interpolate } from './animation.timing';
 
 
 type soundEffectFunction = (
-    effect_name: string, 
+    effect_name: string,
     options?: {
-        volume: LessThan<number, 1> & GreaterThan<0, number>
+        volume: number;
     }
-) => [
-    play: () => void,
-    methods: {
-        rate: (rate: number) => void,
-        volume: (level: number, abrupt?: boolean) => void
-    }
-]
+) => (options?: {
+    overlap?: boolean
+    volume?: number | [number, number]
+    speed?: number | [number, number]
+    onUpdate?: (type:string, data: number) => void
+}) => {
+    rate: (rate: number) => void;
+    volume: (level: number, abrupt?: boolean) => void;
+}
 
-export const soundEffect: soundEffectFunction = (effect_name, options) => {
-    const SoundEffect = new Howl({src: [effects[effect_name]]})
-    let sound_id: number | null = null
 
-    return [
-        () => { 
-            if(sound_id !== null) sound_id = SoundEffect.play(); 
-        },
-        {
-            rate: (rate) => {
-                if(sound_id !== null)
-                    SoundEffect.rate(rate, sound_id);
+export const soundEffect: soundEffectFunction = (effect_link, options) => {
+    const SoundEffect = new Howl({ src: effect_link, volume: options?.volume ?? 1 });
+    let effect_volume: number = options?.volume ?? 1
+
+    return (options) => {
+        const opts = {
+            overlap: false,
+            ...options
+        }
+
+        const id = SoundEffect.play()
+        let instance_volume = opts.volume ?? effect_volume
+        let instance_speed = opts.speed ?? 1
+
+        if (!Array.isArray(instance_volume)) {
+            SoundEffect.volume(instance_volume, id);
+        }
+
+        if (Array.isArray(instance_volume)) {
+            interpolate({
+                range: instance_volume,
+                significant_figure: 0.01,
+                duration: 1000,
+                onUpdate: (val) => {
+                    if(options?.onUpdate) options?.onUpdate("volume", val);
+                    SoundEffect.volume(val, id);
+                },
+            }).start();
+            instance_volume = instance_volume[1]
+        }
+
+        if (!Array.isArray(instance_speed)) {
+            SoundEffect.rate(instance_speed, id);
+        }
+
+        if (Array.isArray(instance_speed)) {
+            interpolate({
+                range: instance_speed,
+                significant_figure: 0.01,
+                duration: 1000,
+                onUpdate: (val) => {
+                    SoundEffect.rate(val, id);
+                    if(options?.onUpdate) options?.onUpdate("rate", val);
+                },
+            }).start();
+            instance_speed = instance_speed[1]
+        }
+
+        return {
+            rate: (speed, abrupt = false) => {
+                if (abrupt) {
+                    SoundEffect.rate(speed, id)
+                } else {
+                    interpolate({
+                        range: [instance_speed as number, speed],
+                        significant_figure: 0.01,
+                        duration: 1000,
+                        onUpdate: (val) => {
+                            SoundEffect.rate(val, id);
+                            if(options?.onUpdate) options?.onUpdate("rate", val);
+                        },
+                    }).start();
+                }
+
+                instance_speed = speed
             },
             volume: (level, abrupt = false) => {
-                if (abrupt){
-                    console.log(SoundEffect)
-
-                    if(sound_id !== null) SoundEffect.volume(level, sound_id);
-                    else SoundEffect.volume(level);
+                if (abrupt) {
+                    SoundEffect.volume(level, id)
+                } else {
+                    interpolate({
+                        range: [instance_volume as number, level],
+                        significant_figure: 0.01,
+                        duration: 1000,
+                        onUpdate: (val) => {
+                            SoundEffect.volume(val, id);
+                            if(options?.onUpdate) options?.onUpdate("volume", val);
+                        },
+                    }).start();
                 }
-                else
-                    transitionVolume(SoundEffect, level).start();
+
+                instance_volume = level
             }
-        }
-    ]
-}
+        };
+    }
+};
 
 export const musicControl = () => {
 
-    return {
-        swap_music: (song_name: string) => {},
-        volume: (level: number) => {},
-    }
-}
+};
 
 export const InitAudio = () => {
-    const audioLevelStore = localStore("audio.volume", Number)
-    
-    const musicLevelSetting = audioLevelStore.get("music", 0.5)
-    const ambienceLevelSetting = audioLevelStore.get("ambience", 0.5)
-    const effectLevelSetting = audioLevelStore.get("effect", 0.5)
-}
+    const audioLevelStore = localStore("audio.volume", Number);
 
+    const musicLevelSetting = audioLevelStore.get("music", 0.5);
+    const ambienceLevelSetting = audioLevelStore.get("ambience", 0.5);
+    const effectLevelSetting = audioLevelStore.get("effect", 0.5);
 
-export const globalAudioControl = () => {return {
-    volume: {
-        music: (level: number, fade = true) => {
-            localStore("audio.volume", Number).set("music", level)
+    // Initialize volumes or playbacks here if needed
+};
+
+export const globalAudioControl = () => {
+    return {
+        volume: {
+            music: (level: number, fade = true) => {
+                localStore("audio.volume", Number).set("music", level);
+            },
+            ambience: (level: number, fade = true) => {
+                localStore("audio.volume", Number).set("ambience", level);
+            },
+            effect: (level: number, fade = true) => {
+                localStore("audio.volume", Number).set("effect", level);
+            }
         },
-        ambience: (level: number, fade = true) => {
-            localStore("audio.volume", Number).set("ambience", level)
-        },
-        effect: (level: number, fade = true) => {
-            localStore("audio.volume", Number).set("effect", level)
+        mute: (mute_audio = true) => {
+            // Implement mute logic
         }
-    },
-    mute: (mute_audio = true) => {}
-} }
+    };
+};

@@ -5,8 +5,8 @@ import { CSSProperties, useRef, useState } from "react"
 export const Panel = () => {
     const [position, setPosition] = useState(0)
 
-    const dur = 12000
-    const sig = 100
+    const dur = 11000
+    const sig = 1000
     const [time, {start, set}] = useTimer(dur, sig)
 
     const animationRef = useRef(
