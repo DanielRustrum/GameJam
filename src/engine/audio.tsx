@@ -1,5 +1,4 @@
 import { Howl } from 'howler';
-import { localStore } from './state';
 import { interpolate } from './animation.timing';
 
 
@@ -104,37 +103,4 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
             }
         };
     }
-};
-
-export const musicControl = () => {
-
-};
-
-export const InitAudio = () => {
-    const audioLevelStore = localStore("audio.volume", Number);
-
-    const musicLevelSetting = audioLevelStore.get("music", 0.5);
-    const ambienceLevelSetting = audioLevelStore.get("ambience", 0.5);
-    const effectLevelSetting = audioLevelStore.get("effect", 0.5);
-
-    // Initialize volumes or playbacks here if needed
-};
-
-export const globalAudioControl = () => {
-    return {
-        volume: {
-            music: (level: number, fade = true) => {
-                localStore("audio.volume", Number).set("music", level);
-            },
-            ambience: (level: number, fade = true) => {
-                localStore("audio.volume", Number).set("ambience", level);
-            },
-            effect: (level: number, fade = true) => {
-                localStore("audio.volume", Number).set("effect", level);
-            }
-        },
-        mute: (mute_audio = true) => {
-            // Implement mute logic
-        }
-    };
 };
