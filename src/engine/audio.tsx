@@ -11,7 +11,10 @@ type soundEffectFunction = (
     overlap?: boolean
     volume?: number | [number, number]
     speed?: number | [number, number]
-    onUpdate?: (type:string, data: number) => void
+    ease?: (data: number) => number
+    duration?: number
+    onUpdate?: (type: string, data: number) => void
+    onEnd?: (type: string) => void
 }) => {
     rate: (rate: number) => void;
     volume: (level: number, abrupt?: boolean) => void;
@@ -23,47 +26,46 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
     let effect_volume: number = options?.volume ?? 1
 
     return (options) => {
-        const opts = {
-            overlap: false,
-            ...options
-        }
-
         const id = SoundEffect.play()
-        let instance_volume = opts.volume ?? effect_volume
-        let instance_speed = opts.speed ?? 1
-
-        if (!Array.isArray(instance_volume)) {
-            SoundEffect.volume(instance_volume, id);
-        }
+        let instance_volume = options?.volume ?? effect_volume
+        let instance_speed = options?.speed ?? 1
 
         if (Array.isArray(instance_volume)) {
+            const new_volume = instance_volume[1]
             interpolate({
                 range: instance_volume,
                 significant_figure: 0.01,
-                duration: 1000,
+                duration: options?.duration ?? 1000,
+                ease: options?.ease,
                 onUpdate: (val) => {
-                    if(options?.onUpdate) options?.onUpdate("volume", val);
+                    if (options?.onUpdate) options?.onUpdate("volume", val);
                     SoundEffect.volume(val, id);
+
+                    if(options?.onEnd && val === new_volume) options?.onEnd("volume");
                 },
             }).start();
-            instance_volume = instance_volume[1]
-        }
-
-        if (!Array.isArray(instance_speed)) {
-            SoundEffect.rate(instance_speed, id);
+            instance_volume = new_volume
+        } else {
+            SoundEffect.volume(instance_volume, id);
         }
 
         if (Array.isArray(instance_speed)) {
+            const new_rate = instance_speed[1]
             interpolate({
                 range: instance_speed,
                 significant_figure: 0.01,
-                duration: 1000,
+                duration: options?.duration ?? 1000,
+                ease: options?.ease,
                 onUpdate: (val) => {
+                    if (options?.onUpdate) options?.onUpdate("rate", val);
                     SoundEffect.rate(val, id);
-                    if(options?.onUpdate) options?.onUpdate("rate", val);
+
+                    if(options?.onEnd && val === new_rate) options?.onEnd("rate");
                 },
             }).start();
-            instance_speed = instance_speed[1]
+            instance_speed = new_rate
+        } else {
+            SoundEffect.rate(instance_speed, id);
         }
 
         return {
@@ -74,10 +76,13 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
                     interpolate({
                         range: [instance_speed as number, speed],
                         significant_figure: 0.01,
-                        duration: 1000,
+                        duration: options?.duration ?? 1000,
+                        ease: options?.ease,
                         onUpdate: (val) => {
                             SoundEffect.rate(val, id);
-                            if(options?.onUpdate) options?.onUpdate("rate", val);
+                            if (options?.onUpdate) options?.onUpdate("rate", val);
+                    
+                            if(options?.onEnd && val === speed) options?.onEnd("rate");
                         },
                     }).start();
                 }
@@ -91,10 +96,13 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
                     interpolate({
                         range: [instance_volume as number, level],
                         significant_figure: 0.01,
-                        duration: 1000,
+                        duration: options?.duration ?? 1000,
+                        ease: options?.ease,
                         onUpdate: (val) => {
                             SoundEffect.volume(val, id);
-                            if(options?.onUpdate) options?.onUpdate("volume", val);
+                            if (options?.onUpdate) options?.onUpdate("volume", val);
+                            
+                            if(options?.onEnd && val === level) options?.onEnd("volume");
                         },
                     }).start();
                 }

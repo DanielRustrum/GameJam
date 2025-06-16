@@ -36,7 +36,7 @@ const chartConfig = {
     }
 }
 
-function VisualizeAudio<ChartData extends Object>(
+function VisualizeAudio<ChartData extends {[key: string]: number}>(
     {
         clickEvents,
         title = "Chart",
@@ -54,6 +54,7 @@ function VisualizeAudio<ChartData extends Object>(
     const [chartData, setChartData] = useState<(ChartData & { timestamp: number })[]>([]);
     const loopRef = useRef<ReturnType<typeof tick> | null>(null);
     const [isRunning, setIsRunning] = useState(true);
+    const [currentData, setCurrentData] = useState<ChartData | null>(null)
 
 
 
@@ -67,9 +68,11 @@ function VisualizeAudio<ChartData extends Object>(
                 if (now - lastUpdate < 50 || !isRunning) return;
                 lastUpdate = now;
 
+                const data = (onDataUpdate?.() ?? {}) as ChartData
+                setCurrentData(data)
+
                 setChartData(prev => {
                     const maxLength = 200;
-                    const data = (onDataUpdate?.() ?? {}) as ChartData
                     const newEntry = {
                         timestamp: now,
                         ...(data || {})
@@ -134,7 +137,10 @@ function VisualizeAudio<ChartData extends Object>(
                     })}
                 </div>
             </CardHeader>
-            <CardContent className="px-2 sm:p-6">
+            <CardContent className="px-2 sm:p-6 sm:pt-0">
+                <p className="text-center pb-4">
+                    <b>Current {activeChart.charAt(0).toUpperCase() + activeChart.slice(1)} Value:</b>  {currentData !== null? currentData[activeChart]: ""}
+                </p>
                 <ChartContainer
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
@@ -203,50 +209,58 @@ function getRandomNumber(min: number, max: number): number {
 }
 
 const LinearEffectExample = () => {
-    const [click_volume, clickVolumeRef, setClickVolume] = useAudioStat(0.1);
+    const [click_volume, clickVolumeRef, setClickVolume] = useAudioStat(0);
     const [click_rate, clickRateRef, setClickRate] = useAudioStat(1);
 
     return (
-        <VisualizeAudio<{ volume: number, rate: number }>
-            title="Audio Modification"
-            description="Visual on how the rate and volume change over time"
-            onDataUpdate={() => ({
-                volume: clickVolumeRef.current,
-                rate: clickRateRef.current
-            })}
-            config={{
-                volume: {
-                    label: "Volume",
-                    color: "var(--chart-1)",
-                },
-                rate: {
-                    label: "Rate",
-                    color: "var(--chart-2)",
-                }
-            }}
-            clickEvents={{
-                Volume: () => {
-                    const newVolume = getRandomNumber(0.1, 2);
-                    click({
-                        volume: [click_volume, newVolume],
-                        onUpdate: (type, value) => {
-                            if (type === "volume") clickVolumeRef.current = value;
-                        }
-                    });
-                    setClickVolume(newVolume);
-                },
-                Rate: () => {
-                    const newRate = getRandomNumber(0.1, 2);
-                    click({
-                        speed: [click_rate, newRate],
-                        onUpdate: (type, value) => {
-                            if (type === "volume") clickRateRef.current = value;
-                        }
-                    });
-                    setClickRate(newRate);
-                }
-            }}
-        />
+        <>
+            <VisualizeAudio<{ volume: number, rate: number }>
+                title="Audio Modification"
+                description="Visual on how the rate and volume change over time"
+                onDataUpdate={() => ({
+                    volume: clickVolumeRef.current,
+                    rate: clickRateRef.current
+                })}
+                config={{
+                    volume: {
+                        label: "Volume",
+                        color: "var(--chart-1)",
+                    },
+                    rate: {
+                        label: "Rate",
+                        color: "var(--chart-2)",
+                    }
+                }}
+                clickEvents={{
+                    Volume: () => {
+                        const newVolume = click_volume >= 1? 0: 1.2;
+                        click({
+                            volume: [click_volume, newVolume],
+                            ease: x => x* x* x,
+                            onEnd: (type) => {
+                                if (type === "volume") setClickVolume(newVolume);
+                            },
+                            onUpdate: (type, value) => {
+                                if (type === "volume") clickVolumeRef.current = value;
+                            }
+                        });
+                    },
+                    Rate: () => {
+                        const newRate = getRandomNumber(0.1, 2);
+                        click({
+                            speed: [click_rate, newRate],
+                            ease: x => x* x* x,
+                            onEnd: (type) => {
+                                if (type === "rate") setClickRate(newRate);
+                            },
+                            onUpdate: (type, value) => {
+                                if (type === "rate") clickRateRef.current = value;
+                            }
+                        });
+                    }
+                }}
+            />
+        </>
     );
 }
 
