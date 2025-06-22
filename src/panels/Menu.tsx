@@ -179,6 +179,7 @@ export const Panel = () =>{
         <Button onClick={() => navigate("audio")}>Navigate to Audio</Button>
         <Button onClick={() => navigate("worker")}>Navigate to Worker</Button>
         <Button onClick={() => navigate("timing")}>Navigate to Timing</Button>
+        <Button onClick={() => navigate("credit")}>Navigate to Credits</Button>
         <p className="text-xl font-bold text-center">Animation</p>
         <Sprite state="main" />
         <RateAnimated />
