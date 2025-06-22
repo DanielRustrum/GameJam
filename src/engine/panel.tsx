@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { Component } from "../types/component"
+import { Component } from "./types/component"
 
 export const useWindowFocus = () => {
     const [is_focused, setIsFocused] = useState(true)

@@ -1,6 +1,6 @@
 import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useRef, useState } from "react";
-import { Component } from "../types/component";
-import { OptionObjectDefaults, OptionObjectDefinition } from "../types/object";
+import { Component } from "./types/component";
+import { OptionObjectDefaults, OptionObjectDefinition } from "./types/object";
 
 
 type Sprite = Component<{

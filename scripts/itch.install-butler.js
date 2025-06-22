@@ -47,6 +47,11 @@ async function extractButlerZip(zipPath, outDir) {
 
 export async function installButler() {
     try {
+        if ( fs.existsSync(BUTLER_EXE) ) {
+            console.log(`✅ Butler executable already installed at ${BIN_DIR}`);
+            return;
+        }
+
         fs.mkdirSync(BIN_DIR, { recursive: true });
 
         const zipPath = path.join(BASE_DIR, "butler.zip");

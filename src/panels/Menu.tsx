@@ -1,11 +1,11 @@
-import { usePanelNavigation } from "../engine/panel"
-import { spritesheet } from "../engine/graphics.sprite"
-import { Button } from "@/components/UI/Button"
-import { Slider } from "@/components/UI/slider"
+import { usePanelNavigation } from "@engine/panel"
+import { spritesheet } from "@engine/graphics.sprite"
+import { Button } from "@ui/button"
+import { Slider } from "@ui/slider"
 
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'
 import { memo, useRef, useState } from "react"
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/UI/resizable"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@ui/resizable"
 
 const [Sprite, {shader}] = spritesheet(test_sheet, {
     tile_size: [32,32],

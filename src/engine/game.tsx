@@ -1,4 +1,4 @@
-import { Component } from "../types/component"
+import { Component } from "./types/component"
 import { PanelController } from "./panel"
 
 type GameControllerComponent = Component<{

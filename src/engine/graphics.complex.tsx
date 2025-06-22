@@ -1,6 +1,6 @@
 import { CSSProperties, Key, useRef } from "react";
-import { Component } from "../types/component";
-import { OptionObjectDefinition } from "../types/object";
+import { Component } from "./types/component";
+import { OptionObjectDefinition } from "./types/object";
 import { Application } from "@pixi/react";
 import { Application as App, Renderer } from "pixi.js";
 

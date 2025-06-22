@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { GameController } from './engine/game'
-import { Component } from './types/component'
+import { Component } from './engine/types/component'
 
 const panels = Object.fromEntries(
   Object.values(
