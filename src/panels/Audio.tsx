@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { soundEffect } from "../engine/audio";
-import shield_stop from '../assets/sounds/effects/shield-stop.wav'
+import shield_stop from '@assets/sounds/effects/shield-stop.wav'
 
 import * as React from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"

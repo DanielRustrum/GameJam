@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import './stylex.css'
 import { GameController } from './engine/game'
 import { Component } from './types/component'
 

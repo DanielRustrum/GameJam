@@ -1,16 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
-import styleX from "vite-plugin-stylex" 
 import tailwindcss from '@tailwindcss/vite'
-// import zipPack from "vite-plugin-zip-pack";
 
-// https://vite.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@assets': path.resolve(__dirname, 'assets'),
       '@components': path.resolve(__dirname, 'src/components'),
       '@panels': path.resolve(__dirname, 'src/panels'),
       '@engine': path.resolve(__dirname, 'src/engine'),
@@ -19,6 +16,10 @@ export default defineConfig({
       '@data': path.resolve(__dirname, 'src/data'),
     },
   },
-  plugins: [react(), styleX(), tailwindcss()],
-  base: "./"
+  plugins: [react(), tailwindcss()],
+  base: "./",
+  build: {
+    outDir: "release/dist",
+    assetsDir: "assets"
+  },
 })
