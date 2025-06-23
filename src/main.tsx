@@ -1,54 +1,30 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import './index.scss'
+import './index.css'
+import { GameController } from './engine/game'
+import { Component } from './engine/types/component'
 
-import { Menu } from './pages/Menu'
-import { Field } from './pages/Field'
-import { Stronghold } from './pages/Stronghold';
-import { End } from './pages/Gameover';
-import { Town } from './pages/Town';
-import { Explore } from './pages/Explore';
-import { Tutorial } from './pages/Tutorial';
-import { setupBackgroundMusic } from './hooks/useBackgroundMusic';
-import { Credits } from './pages/Credits';
-
-const NotFound = () => {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    navigate("/")
-  }, [])
+const panels = Object.fromEntries(
+  Object.values(
+    import.meta.glob(
+      '@panels/*.tsx',
+      {eager: true}
+    )
+  ).map((mod: any) => {
+      return [mod.name, mod.Panel]
+  })
+) as {[key: string]: Component}
 
 
-  return <p>Loading Home</p>
-}
 
-const Global = () => {
-  const MusicWrapper = setupBackgroundMusic()
-  
-  // const router_props = {
-  //   basename: import.meta.env.BASE_URL === "/"? undefined: import.meta.env.BASE_URL
-  // }
+const Error = ({}) => <></>
 
-  return (
-    <MusicWrapper>
-      <BrowserRouter >
-        <Routes>
-          <Route path="/" element={<Menu />} />
-          <Route path="/field" element={<Field />} />
-          <Route path="/upgrade" element={<Stronghold />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/end-game" element={<End />} />
-          <Route path="/town" element={<Town />} />
-          <Route path="/tutorial" element={<Tutorial />} />
-          <Route path="/credits" element={<Credits />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </MusicWrapper>
-  )
-}
+const Global = () => <GameController 
+    entry_panel='menu'
+    PanelErrorComponent={Error}
+    panels={panels}
+  >
+  </GameController>
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
