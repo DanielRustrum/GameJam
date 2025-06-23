@@ -2,13 +2,14 @@ import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import { usePanelNavigation } from "@engine/panel"
 import { Button } from '@/components/UI/button';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import '@panels/credits.scss'
 import { ScrollArea } from "@ui/scroll-area"
 
 import credit_markdown from '@assets/credits.md?raw'
+import { cn } from '@/engine/shadcn';
 
-const AVATARS:{[key: string]: string} = {
+const AVATARS: { [key: string]: string } = {
     "": ""
 }
 
@@ -27,8 +28,32 @@ function Contributor({ name, role, avatar, children }: { name: string; role: str
 
 function BackToMenuButton({ children }: { children: ReactNode }) {
     const navigate = usePanelNavigation()
+    const buttonRef = useRef<HTMLDivElement>(null);
+    const [isPinned, setIsPinned] = useState(true);
+
+    useEffect(() => {
+        const el = buttonRef.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsPinned(entry.intersectionRatio === 1);
+            },
+            { threshold: [1] }
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
     return (
-        <div className='self-end sticky bottom-0 px-10 py-5 bg-white rounded-t-md right-30'>
+        <div
+            ref={buttonRef}
+            className={cn(
+                'self-end sticky bottom-[-1px] px-10 py-5 right-30 bg-gray-500 transition-all duration-300',
+                isPinned ? "rounded-md": "rounded-t-md" 
+            )}
+        >
             <Button className="max-w-sm" onClick={() => { navigate("menu") }}>{children}</Button>
         </div>
     )
@@ -40,13 +65,13 @@ const components: Partial<Record<string, any>> = {
         return <Contributor name={name} role={role} avatar={avatar}>{children}</Contributor>;
     },
     h1: "h2",
-    space: ({}) => <br />
+    space: ({ }) => <br />
 };
 
 export const Panel = () => {
     return (
-        <div className='flex flex-col mx-5 py-5 gap-10 min-h-dvh justify-between'>
-            <h1 className='text-center text-2xl font-bold'>Credits</h1>
+        <div className='flex flex-col mx-5 py-5 gap-3 min-h-dvh justify-between'>
+            <h1 className='text-center text-2xl font-bold pb-4'>Credits</h1>
             <ScrollArea>
                 <div id="markdown-container" className='mx-15 p-5 rounded-md border-0 bg-purple-400 grow h-screen'>
                     <Markdown
