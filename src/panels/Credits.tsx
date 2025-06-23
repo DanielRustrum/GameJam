@@ -7,13 +7,14 @@ import '@panels/credits.scss'
 
 import credit_markdown from '@assets/credits.md?raw'
 
-function Contributor({ name, role, avatar }: { name: string; role: string; avatar: string }) {
+function Contributor({ name, role, avatar, children }: { name: string; role: string; avatar: string, children: ReactNode }) {
     return (
-        <div className="contributor-card">
+        <div className="contributor-card m-auto">
             <img src={avatar} alt={name} width={64} height={64} />
             <div>
                 <strong>{name}</strong>
                 <div>{role}</div>
+                <div>{children}</div>
             </div>
         </div>
     );
@@ -29,9 +30,9 @@ function BackToMenuButton({ children }: { children: ReactNode }) {
 }
 
 const components: Partial<Record<string, any>> = {
-    contributor: ({ node }: any) => {
+    contributor: ({ node, children }: any) => {
         const { name, role, avatar } = node.properties ?? {};
-        return <Contributor name={name} role={role} avatar={avatar} />;
+        return <Contributor name={name} role={role} avatar={avatar}>{children}</Contributor>;
     },
     h1: "h2"
 };
