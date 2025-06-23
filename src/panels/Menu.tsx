@@ -1,6 +1,6 @@
 import { usePanelNavigation } from "@engine/panel"
 import { spritesheet } from "@engine/graphics.sprite"
-import { Button } from "@ui/button"
+import { Button } from "@/components/UI/button"
 import { Slider } from "@ui/slider"
 
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'

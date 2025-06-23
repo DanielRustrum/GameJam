@@ -1,7 +1,7 @@
 import Markdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import { usePanelNavigation } from "@engine/panel"
-import { Button } from '@ui/button';
+import { Button } from '@/components/UI/button';
 import { ReactNode } from 'react';
 import '@panels/credits.scss'
 
