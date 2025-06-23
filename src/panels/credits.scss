@@ -5,8 +5,3 @@
 #markdown-container p {
     text-align: center;
 }
-
-.stuck\:rounded-b-md {
-    border-bottom-right-radius: calc(var(--radius) /* 0.25rem = 4px */ - 2px);
-    border-bottom-left-radius: calc(var(--radius) /* 0.25rem = 4px */ - 2px);
-}
