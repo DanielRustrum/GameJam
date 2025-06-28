@@ -1,0 +1,6 @@
+{
+    "title": "Game Title",
+    "error_messages": {
+        "using_firefox": "Unfortunately, this game may be unstable on firefox. We plan on supporting firefox in the future, but at the moment we are focusing on getting the game in a fun and playable state."
+    }
+}

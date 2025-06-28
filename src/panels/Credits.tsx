@@ -8,6 +8,7 @@ import { ScrollArea } from "@ui/scroll-area"
 
 import credit_markdown from '@assets/credits.md?raw'
 import { cn } from '@/engine/shadcn';
+import { MenuBackground } from '@/components/Game/Background';
 
 const AVATARS = Object.fromEntries(
   Object.values(
@@ -77,7 +78,7 @@ const components: Partial<Record<string, any>> = {
 
 export const Panel = () => {
     return (
-        <div className='flex flex-col mx-5 py-5 gap-3 min-h-dvh  h-fit justify-between'>
+        <MenuBackground className='flex flex-col mx-5 py-5 gap-3 min-h-dvh  h-fit justify-between'>
             <h1 className='text-center text-2xl font-bold pb-4'>Credits</h1>
             <ScrollArea>
                 <div id="markdown-container" className='md:mx-15 sm:mx-0 p-5 rounded-md border-0 bg-purple-400 grow h-fit m-h-screen'>
@@ -90,8 +91,8 @@ export const Panel = () => {
                 </div>
             </ScrollArea>
             <BackToMenuButton>Back To Main Menu</BackToMenuButton>
-        </div>
+        </MenuBackground>
     )
 }
 
-export const name = "credit"
+export const name = "credits"

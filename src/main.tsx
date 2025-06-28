@@ -20,7 +20,7 @@ const panels = Object.fromEntries(
 const Error = ({}) => <></>
 
 const Global = () => <GameController 
-    entry_panel='menu'
+    entry_panel='intro'
     PanelErrorComponent={Error}
     panels={panels}
   >
