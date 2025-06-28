@@ -33,9 +33,19 @@ export const useTimer = (timer_args: Parameters<typeof timer>[0]) => {
         timerRef.current.update(timer_arg)
     }
 
+    const reset = () => {
+        
+        timerRef.current = timer({
+            ...timer_args,
+            timer: timerObject,
+            onUpdate: (remaining: number) => setTime(remaining)
+        })
+        // timerRef.current.set(time)
+    }
+
     return {
         time,
-        methods: { ...timerRef.current, set, start, update }
+        methods: { ...timerRef.current, set, start, update, reset }
     }
 }
 

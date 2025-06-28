@@ -8,6 +8,7 @@ type AnimationLoopFunction = (arg: {
     start: () => void
     stop: () => void
     reset: () => void
+    rate: (throttle: number) => void
 }
 
 export const tick: AnimationLoopFunction = ({
@@ -16,6 +17,7 @@ export const tick: AnimationLoopFunction = ({
     let loop_id: null | number = null
     let init_loop = false
     let last_recorded_timestamp: number = 0
+    let interval = throttle
 
 
     const loop = (timestamp: number) => {
@@ -25,10 +27,10 @@ export const tick: AnimationLoopFunction = ({
             last_recorded_timestamp = timestamp
         }
 
-        if (throttle === undefined) {
+        if (interval === undefined) {
             onTick(timestamp)
         }
-        else if (timestamp - last_recorded_timestamp >= throttle) {
+        else if (timestamp - last_recorded_timestamp >= interval) {
             last_recorded_timestamp = timestamp
             onTick(timestamp)
         }
@@ -57,7 +59,11 @@ export const tick: AnimationLoopFunction = ({
         stop()
     }
 
-    return { start, stop, reset }
+    const rate = (throttle: number) => {
+        interval = throttle
+    }
+
+    return { start, stop, reset, rate }
 }
 
 
@@ -83,12 +89,12 @@ export const timer = <T extends TimerTypes>(
 ) => {
     let current_time = 0
     let timer_data = args.timer
+    let last_recorded_timestamp: null | number = null
 
 
     const getTickMethods = () => {
         if (timer_data.type === "constrained") {
             const direction_vector = timer_data.start_time < timer_data.stop_time ? 1 : -1
-            let last_recorded_timestamp: null | number = null
 
             return tick({
                 throttle: args.interval,
@@ -101,7 +107,6 @@ export const timer = <T extends TimerTypes>(
                     current_time = current_time + (direction_vector * delta)
                     last_recorded_timestamp = timestamp
                     const rounded_time = Math.round(Math.max(current_time, 0) / (args.interval ?? 0)) * (args.interval ?? 0)
-                    console.log(current_time)
                     if (args.onUpdate) args.onUpdate(rounded_time);
                 },
                 endCondition: () => {
@@ -172,18 +177,21 @@ export const timer = <T extends TimerTypes>(
 
     const pause = () => Loop.stop()
 
-    const resume = () => Loop.start()
+    const resume = () => {
+        last_recorded_timestamp = performance.now()
+        Loop.start()
+    }
     
+    const interval = (interval: number) => Loop.rate(interval)
 
     const set = (time: number) => { current_time = time }
 
     const update = (timer: T) => { timer_data = timer }
 
-    return { start, stop, pause, resume, set, update }
+    return { start, stop, pause, resume, set, update, interval }
 }
 
 // Interpolations
-
 type InterpolateFunction = (args: {
     range: [number, number],
     significant_figure: number,

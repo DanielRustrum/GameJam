@@ -1,7 +1,6 @@
 import { Button } from "@ui/button"
-import { interpolate } from "@/engine/animation.timing"
 import { useInterpolation, useTimer } from "@/engine/animation.timing.react"
-import { CSSProperties, useRef, useState } from "react"
+import { CSSProperties, useState } from "react"
 import { Component } from "@/engine/types/component"
 
 const Demo: Component<{ name: string }> = ({ name, children, className }) => {
@@ -29,18 +28,33 @@ const TickDemo = () => {
 }
 
 const TimerDemo = () => {
+    const [loop_timer, setLoopTimer] = useState(false)
     const { time, methods: timer } = useTimer({
         timer: {
             type: "constrained",
-            start_time: 10000,
+            start_time: 2000,
             stop_time: 1000
         },
-        interval: 1000
+        interval: 100,
+        onEnd: () => {
+            if(loop_timer) timer.start();
+            console.log(loop_timer)
+        }
     })
 
     return <Demo name="Timer" className="flex justify-center p-20 gap-10">
-        <p>Timer: {time}</p>
-        <Button onClick={() => timer.start()}> Start Timer </Button>
+        <p><b>Timer:</b> {time}</p>
+        <div className="flex flex-col gap-2">
+            <Button onClick={() => timer.start()}> Start Timer </Button>
+            <Button onClick={() => timer.pause()}> Pause Timer </Button>
+            <Button onClick={() => timer.resume()}> Resume Timer </Button>
+        </div>
+        <Button onClick={() => {
+            setLoopTimer(val => !val)
+            timer.reset()
+        }}> 
+            {loop_timer? "Convert to Standard Timer": "Convert to Interval Timer"} 
+        </Button>
     </Demo>
 }
 
