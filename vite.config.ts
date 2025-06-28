@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
+export default defineConfig(({command}) => ({
+  
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -17,9 +18,14 @@ export default defineConfig({
     },
   },
   plugins: [react(), tailwindcss()],
-  base: "./",
+  base: command === 'build' ? './' : '/',
   build: {
     outDir: "release/dist",
     assetsDir: "assets"
-  },
-})
+  },server: {
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+    },
+  }
+}))

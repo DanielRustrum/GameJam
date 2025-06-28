@@ -1,11 +1,11 @@
-import { Howl } from 'howler';
-import { interpolate } from './animation.timing';
+import { Howl } from 'howler'
+import { interpolate } from './animation.timing'
 
 
 type soundEffectFunction = (
     effect_name: string,
     options?: {
-        volume: number;
+        volume: number
     }
 ) => (options?: {
     overlap?: boolean
@@ -16,13 +16,13 @@ type soundEffectFunction = (
     onUpdate?: (type: string, data: number) => void
     onEnd?: (type: string) => void
 }) => {
-    rate: (rate: number) => void;
-    volume: (level: number, abrupt?: boolean) => void;
+    rate: (rate: number) => void
+    volume: (level: number, abrupt?: boolean) => void
 }
 
 
 export const soundEffect: soundEffectFunction = (effect_link, options) => {
-    const SoundEffect = new Howl({ src: effect_link, volume: options?.volume ?? 1 });
+    const SoundEffect = new Howl({ src: effect_link, volume: options?.volume ?? 1 })
     let effect_volume: number = options?.volume ?? 1
 
     return (options) => {
@@ -32,40 +32,50 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
 
         if (Array.isArray(instance_volume)) {
             const new_volume = instance_volume[1]
+
             interpolate({
                 range: instance_volume,
                 significant_figure: 0.01,
                 duration: options?.duration ?? 1000,
                 ease: options?.ease,
                 onUpdate: (val) => {
-                    if (options?.onUpdate) options?.onUpdate("volume", val);
-                    SoundEffect.volume(val, id);
+                    if (options?.onUpdate) 
+                        options?.onUpdate("volume", val);
 
-                    if(options?.onEnd && val === new_volume) options?.onEnd("volume");
+                    SoundEffect.volume(val, id)
+
+                    if (options?.onEnd && val === new_volume) 
+                        options?.onEnd("volume");
                 },
-            }).start();
+            }).start()
+            
             instance_volume = new_volume
         } else {
-            SoundEffect.volume(instance_volume, id);
+            SoundEffect.volume(instance_volume, id)
         }
 
         if (Array.isArray(instance_speed)) {
             const new_rate = instance_speed[1]
+
             interpolate({
                 range: instance_speed,
                 significant_figure: 0.01,
                 duration: options?.duration ?? 1000,
                 ease: options?.ease,
                 onUpdate: (val) => {
-                    if (options?.onUpdate) options?.onUpdate("rate", val);
-                    SoundEffect.rate(val, id);
+                    if (options?.onUpdate) 
+                        options?.onUpdate("rate", val);
 
-                    if(options?.onEnd && val === new_rate) options?.onEnd("rate");
+                    SoundEffect.rate(val, id)
+
+                    if (options?.onEnd && val === new_rate) 
+                        options?.onEnd("rate");
                 },
-            }).start();
+            }).start()
+
             instance_speed = new_rate
         } else {
-            SoundEffect.rate(instance_speed, id);
+            SoundEffect.rate(instance_speed, id)
         }
 
         return {
@@ -79,12 +89,15 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
                         duration: options?.duration ?? 1000,
                         ease: options?.ease,
                         onUpdate: (val) => {
-                            SoundEffect.rate(val, id);
-                            if (options?.onUpdate) options?.onUpdate("rate", val);
-                    
-                            if(options?.onEnd && val === speed) options?.onEnd("rate");
+                            SoundEffect.rate(val, id)
+
+                            if (options?.onUpdate) 
+                                options?.onUpdate("rate", val);
+
+                            if (options?.onEnd && val === speed) 
+                                options?.onEnd("rate");
                         },
-                    }).start();
+                    }).start()
                 }
 
                 instance_speed = speed
@@ -99,16 +112,19 @@ export const soundEffect: soundEffectFunction = (effect_link, options) => {
                         duration: options?.duration ?? 1000,
                         ease: options?.ease,
                         onUpdate: (val) => {
-                            SoundEffect.volume(val, id);
-                            if (options?.onUpdate) options?.onUpdate("volume", val);
-                            
-                            if(options?.onEnd && val === level) options?.onEnd("volume");
+                            SoundEffect.volume(val, id)
+
+                            if (options?.onUpdate) 
+                                options?.onUpdate("volume", val);
+
+                            if (options?.onEnd && val === level) 
+                                options?.onEnd("volume");
                         },
-                    }).start();
+                    }).start()
                 }
 
                 instance_volume = level
             }
-        };
+        }
     }
-};
+}

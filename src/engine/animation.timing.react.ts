@@ -1,80 +1,55 @@
-import { useEffect, useRef, useState } from "react"
-import { timer } from "@/engine/animation.timing"
+import { useRef, useState } from "react"
+import { tick, timer, interpolate } from "@/engine/animation.timing"
 
-// const useTick = () => { }
-
-const activeTimers = new Set<{ stop: () => void }>()
-
-export type UseTimerHook = (
-    duration: number,
-    significant_figure: number
-) => [
-        number,
-        {
-            start: () => void
-            stop: () => void
-            pause: () => void
-            resume: () => void
-            set: (time: number) => void
-            update: (duration: number) => void
-        }
-    ]
-
-export const useTimer: UseTimerHook = (initialDuration, initialSigFig) => {
-    const [time, setTime] = useState(initialDuration)
-    const durationRef = useRef(initialDuration)
-    const sigFigRef = useRef(initialSigFig)
-
-    const timerRef = useRef(
-        timer(durationRef.current, sigFigRef.current, (remaining) => setTime(remaining))
-    )
-
-    useEffect(() => {
-        const instance = timerRef.current
-        activeTimers.add(instance)
-
-        return () => {
-            instance.stop()
-            activeTimers.delete(instance)
-        }
-    }, [])
-
-    if (import.meta.hot) {
-        import.meta.hot.dispose(() => {
-            for (const t of activeTimers) t.stop()
-            activeTimers.clear()
-        })
-
-        import.meta.hot.accept(() => {
-            const newTimer = timer(durationRef.current, sigFigRef.current, (remaining) => setTime(remaining))
-            timerRef.current.stop()
-            timerRef.current = newTimer
-            timerRef.current.start()
-        })
-    }
-
-    return [
-        time,
-        {
-            start: () => {
-                timerRef.current.set(durationRef.current)
-                timerRef.current.start()
-            },
-            stop: timerRef.current.stop,
-            pause: timerRef.current.pause,
-            resume: timerRef.current.resume,
-            set: (value: number) => {
-                setTime(value)
-                timerRef.current.set(value)
-            },
-            update: (newDuration: number) => {
-                durationRef.current = newDuration
-                timerRef.current.update(newDuration)
-            }
-        }
-    ]
+export const useTick = (tick_args: Parameters<typeof tick>[0]) => {
+    const timerRef = useRef(tick(tick_args))
+    return timerRef.current
 }
 
-// const useInterval = () => { }
-// const useInterpolation = () => { }
+export const useTimer = (timer_args: Parameters<typeof timer>[0]) => {
+    const [time, setTime] = useState(timer_args.timer.start_time)
+    let timerObject = timer_args.timer
+
+    const timerRef = useRef(
+        timer({
+            ...timer_args,
+            timer: timerObject,
+            onUpdate: (remaining: number) => setTime(remaining)
+        })
+    )
+
+    const set = (time: number) => {
+        setTime(time)
+        timerRef.current.set(time)
+    }
+
+    const start = () => {
+        setTime(timerObject.start_time)
+        timerRef.current.start()
+    }
+
+    const update = (timer_arg: Parameters<typeof timer>[0]["timer"]) => {
+        timerObject = timer_arg
+        timerRef.current.update(timer_arg)
+    }
+
+    return {
+        time,
+        methods: { ...timerRef.current, set, start, update }
+    }
+}
+
+export const useInterpolation = (interpolate_args: Parameters<typeof interpolate>[0]) => {
+    const [data, setData] = useState(0)
+
+    const animationRef = useRef(
+        interpolate({
+            ...interpolate_args,
+            onUpdate: (step) => setData(step),
+        })
+    )
+
+    return {data, methods: { ...animationRef.current }}
+
+}
 // const useSeries = () => { }

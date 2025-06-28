@@ -1,7 +1,6 @@
-import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useRef, useState } from "react";
-import { Component } from "./types/component";
-import { OptionObjectDefaults, OptionObjectDefinition } from "./types/object";
-
+import { CSSProperties, ImgHTMLAttributes, memo, RefObject, useEffect, useRef, useState } from "react"
+import { Component } from "./types/component"
+import { OptionObjectDefaults, OptionObjectDefinition } from "./types/object"
 
 type Sprite = Component<{
     state: string
@@ -13,7 +12,7 @@ type Sprite = Component<{
     paused?: boolean
 
     style?: CSSProperties
-    animation?: string;
+    animation?: string
 } & ImgHTMLAttributes<HTMLImageElement>>
 
 type SpritesheetFunction = (
@@ -42,14 +41,16 @@ type SpritesheetFunction = (
 }]
 
 
-if(document.querySelector("[data-sprite-animation]") === null) {
+if (document.querySelector("[data-sprite-animation]") === null) {
     const style = document.createElement("style")
+
     style.textContent = `
         @keyframes spriteAnimation {
             0% { object-position: var(--sprite-last-frame) var(--sprite-layer); }
             100% { object-position: 0px var(--sprite-layer); }
         }
     `
+
     style.setAttribute("data-sprite-animation", "")
     document.head.appendChild(style)
 }
@@ -87,14 +88,14 @@ if(document.querySelector("[data-sprite-animation]") === null) {
  *     idle: { type: 'tile', layer: 1, length: 1 },
  *   },
  *   loading: 'load',
- * });
+ * })
  *
  * // Register a glowing shader effect
  * shader('glow', (ctx, width, height) => {
- *   ctx.globalCompositeOperation = 'lighter';
- *   ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
- *   ctx.fillRect(0, 0, width, height);
- * });
+ *   ctx.globalCompositeOperation = 'lighter'
+ *   ctx.fillStyle = 'rgba(255, 255, 0, 0.5)'
+ *   ctx.fillRect(0, 0, width, height)
+ * })
  *
  * // Use the Sprite component in your React tree
  * <Sprite
@@ -110,7 +111,7 @@ if(document.querySelector("[data-sprite-animation]") === null) {
 export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     const shaders = new Map<string, string>()
     const rerenders = new Map<string, number>()
-    
+
 
     const opts: OptionObjectDefaults<SpritesheetFunction, 1> = {
         tile_size: [100, 100],
@@ -125,20 +126,22 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     image.src = src
 
     if (opts.loading === "preload" && image.decode) {
-        image.decode().catch(() => {});  //? decode without blocking
+        image.decode().catch(() => { })  //? decode without blocking
     }
 
     const shader = (id: string, callback: CallableFunction) => {
         const render = async () => {
-            const canvas: HTMLCanvasElement | OffscreenCanvas =
-                typeof OffscreenCanvas !== "undefined"
-                    ? new OffscreenCanvas(image.naturalWidth, image.naturalHeight)
-                    : Object.assign(document.createElement("canvas"), {
+            const canvas: HTMLCanvasElement | OffscreenCanvas = typeof OffscreenCanvas !== "undefined" ?
+                new OffscreenCanvas(image.naturalWidth, image.naturalHeight) :
+                Object.assign(
+                    document.createElement("canvas"),
+                    {
                         width: image.naturalWidth,
                         height: image.naturalHeight
-                    })
+                    }
+                )
 
-            const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
+            const ctx = canvas.getContext("2d") as OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
             if (!ctx || typeof ctx.drawImage !== "function") return;
 
             ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight)
@@ -147,7 +150,7 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
             const finalize = (url: string) => {
                 shaders.set(id, url)
                 rerenders.set(id, Date.now())
-            };
+            }
 
             if ("convertToBlob" in canvas) {
                 const blob = await (canvas as OffscreenCanvas).convertToBlob()
@@ -159,9 +162,9 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         }
 
         if (image.complete)
-            render();
+            render()
         else
-            image.onload = render;
+            image.onload = render
     }
 
     const Sprite: Sprite = memo(({
@@ -181,28 +184,28 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
     }) => {
         const [resize_scale, setResizeScale] = useState(1)
         const imgRef = useRef<HTMLImageElement>(null)
-        const [isInView, setIsInView] = useState(opts.loading !== "lazy");
-        const imageSrc = use_shader !== ""? shaders.get(use_shader): image.src
-        
+        const [isInView, setIsInView] = useState(opts.loading !== "lazy")
+        const imageSrc = use_shader !== "" ? shaders.get(use_shader) : image.src
+
         //* Lazy Loading Control
         useEffect(() => {
             if (opts.loading !== "lazy" || !imgRef.current) return;
-    
+
             const observer = new IntersectionObserver(([entry]) => {
                 if (entry.isIntersecting) {
                     setIsInView(true)
                     observer.disconnect()
                 }
             })
-    
+
             observer.observe(imgRef.current)
-    
+
             return () => observer.disconnect()
         }, [])
 
         //* Resize Control
         useEffect(() => {
-            if (resizeTo?.current === undefined) return () => {};
+            if (resizeTo?.current === undefined) return () => { };
 
             const observer = new ResizeObserver((entries) => {
                 const { width, height } = entries[0].contentRect
@@ -211,17 +214,19 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
                 )
             })
 
-            if (resizeTo.current) observer.observe(resizeTo.current);
+            if (resizeTo.current) 
+                observer.observe(resizeTo.current);
 
             return () => {
-                if (resizeTo.current) observer.unobserve(resizeTo.current);
+                if (resizeTo.current) 
+                    observer.unobserve(resizeTo.current);
             }
         }, [])
 
         //* Rerender Control
         const [_, setTick] = useState(0) //? Used to Force Rerenders of the Component
         useEffect(() => {
-            if(paused) return;
+            if (paused) return;
 
             const id = setInterval(() => {
                 const modTime = rerenders.get(use_shader)
@@ -235,7 +240,7 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
 
             return () => clearInterval(id)
         }, [use_shader])
-        
+
 
         const stateConfig = opts.structure[state]
         const computedScale = resizeTo ? resize_scale : scale
@@ -243,9 +248,9 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
         const width = opts.tile_size[1] * computedScale
         const layer = stateConfig.layer * computedScale * opts.tile_size[0]
 
-        if(imageSrc === undefined && isInView)
-            return <div style={{width: width, height: height}}>{children}</div>;
-        
+        if (imageSrc === undefined && isInView)
+            return <div style={{ width: width, height: height }}>{children}</div>;
+
         const sprite_style: React.CSSProperties = {
             height,
             width,
@@ -253,31 +258,31 @@ export const spritesheet: SpritesheetFunction = (src, options = {}) => {
             objectFit: "cover",
             "--sprite-layer": `${layer}px`,
         } as React.CSSProperties
-  
+
         if (stateConfig.type === "animated")
             Object.assign(sprite_style, {
                 "--sprite-last-frame": `-${opts.tile_size[1] * computedScale * stateConfig.length}px`,
                 "--frames": stateConfig.length,
                 "--duration": `${opts.frame_time * stateConfig.length * (1 / rate)}s`,
                 animation: `spriteAnimation var(--duration) steps(var(--frames), start) infinite${animation ? `, ${animation}` : ""}`
-            });
+            })
         else
-            Object.assign(sprite_style, { 
-                objectPosition: `-${opts.tile_size[1] * computedScale * (tile - 1)}px ${layer}px` 
-            });
+            Object.assign(sprite_style, {
+                objectPosition: `-${opts.tile_size[1] * computedScale * (tile - 1)}px ${layer}px`
+            })
 
 
         Object.assign(style, sprite_style)
-  
+
         return (
-          <img
-            {...imgProps}
-            src={isInView ? imageSrc : undefined}
-            width={width}
-            height={height}
-            ref={imgRef}
-            style={style}
-          />
+            <img
+                {...imgProps}
+                src={isInView ? imageSrc : undefined}
+                width={width}
+                height={height}
+                ref={imgRef}
+                style={style}
+            />
         )
     })
 

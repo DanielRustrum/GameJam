@@ -9,14 +9,21 @@ import { ScrollArea } from "@ui/scroll-area"
 import credit_markdown from '@assets/credits.md?raw'
 import { cn } from '@/engine/shadcn';
 
-const AVATARS: { [key: string]: string } = {
-    "": ""
-}
+const AVATARS = Object.fromEntries(
+  Object.values(
+    import.meta.glob('@assets/avatars/*.png', { eager: true })
+  ).map((image: any) => {
+    const path = image.default as string;
+    const filename = path.split("/").pop()?.split(".").slice(0, -1).join(".") || "unknown";
+    return [filename, path];
+  })
+) as { [key: string]: string };
+
 
 function Contributor({ name, role, avatar, children }: { name: string; role: string; avatar: string, children: ReactNode }) {
     return (
-        <div className="contributor-card m-auto min-w-[30%] justify-center">
-            <img className="m-auto rounded-full" src={AVATARS[avatar]} alt={name} width={64} height={64} />
+        <div className="m-auto min-w-[30%] justify-center">
+            <img className="m-auto rounded-full pb-3" src={AVATARS[avatar]} alt={`${name}'s Avatar Image`} width={64} height={64} />
             <div>
                 <p><strong>{name}</strong></p>
                 <p>{role}</p>
@@ -50,11 +57,11 @@ function BackToMenuButton({ children }: { children: ReactNode }) {
         <div
             ref={buttonRef}
             className={cn(
-                'self-end sticky bottom-[-1px] px-10 py-5 right-30 bg-gray-500 transition-all duration-300',
-                isPinned ? "rounded-md": "rounded-t-md" 
+                'md:self-end sm:self-center sticky bottom-[-1px] px-10 py-5 right-30 transition-all duration-300 md:w-sm sm:w-10/12 mx-5',
+                isPinned ? "rounded-md bg-gray-200": "rounded-t-md bg-white"
             )}
         >
-            <Button className="max-w-sm" onClick={() => { navigate("menu") }}>{children}</Button>
+            <Button className="w-full" onClick={() => { navigate("menu") }}>{children}</Button>
         </div>
     )
 }
@@ -70,10 +77,10 @@ const components: Partial<Record<string, any>> = {
 
 export const Panel = () => {
     return (
-        <div className='flex flex-col mx-5 py-5 gap-3 min-h-dvh justify-between'>
+        <div className='flex flex-col mx-5 py-5 gap-3 min-h-dvh  h-fit justify-between'>
             <h1 className='text-center text-2xl font-bold pb-4'>Credits</h1>
             <ScrollArea>
-                <div id="markdown-container" className='mx-15 p-5 rounded-md border-0 bg-purple-400 grow h-screen'>
+                <div id="markdown-container" className='md:mx-15 sm:mx-0 p-5 rounded-md border-0 bg-purple-400 grow h-fit m-h-screen'>
                     <Markdown
                         rehypePlugins={[rehypeRaw]}
                         components={components}

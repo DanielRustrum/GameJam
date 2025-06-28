@@ -3,6 +3,7 @@ type AnimationLoopFunction = (arg: {
     onEnd?: () => void
     onInit?: (timestamp: number) => void
     endCondition?: (timestamp: number) => boolean
+    throttle?: number
 }) => {
     start: () => void
     stop: () => void
@@ -10,19 +11,29 @@ type AnimationLoopFunction = (arg: {
 }
 
 export const tick: AnimationLoopFunction = ({
-    onInit, onTick, endCondition, onEnd
+    onInit, onTick, endCondition, onEnd, throttle
 }) => {
     let loop_id: null | number = null
     let init_loop = false
+    let last_recorded_timestamp: number = 0
+
 
     const loop = (timestamp: number) => {
         if (!init_loop) {
             if (onInit !== undefined) onInit(timestamp);
             init_loop = true
+            last_recorded_timestamp = timestamp
         }
 
-        onTick(timestamp)
- 
+        if (throttle === undefined) {
+            onTick(timestamp)
+        }
+        else if (timestamp - last_recorded_timestamp >= throttle) {
+            last_recorded_timestamp = timestamp
+            onTick(timestamp)
+        }
+
+
         if (endCondition !== undefined && endCondition(timestamp)) {
             if (onEnd !== undefined) onEnd();
         } else {
@@ -51,139 +62,141 @@ export const tick: AnimationLoopFunction = ({
 
 
 // Time Based
-
-export const timer = (
-    duration: number,
-    significant_figure: number,
-    onUpdate?: (remaining_time: number) => void
-) => {
-    let start_time = 0
-    let last_tick_time = 0
-    let current_time = duration
-    let timer_duration = duration
-
-    const Loop = tick({
-        onInit: (timestamp) => {
-            start_time = timestamp
-            last_tick_time = timestamp
-        },
-        onTick: (timestamp) => {
-            const delta = timestamp - last_tick_time
-            if (delta >= significant_figure) {
-                current_time -= delta
-                last_tick_time = timestamp
-                const rounded_time = Math.round(Math.max(current_time, 0) / significant_figure) * significant_figure
-                if (onUpdate) onUpdate(rounded_time)
-            }
-        },
-        endCondition: (timestamp) => {
-            return (timestamp - start_time) >= timer_duration
-        },
-        onEnd: () => {
-            current_time = 0
-            if (onUpdate) onUpdate(0)
-        }
-    })
-
-    const start = () => {
-        current_time = timer_duration;
-        Loop.reset()
-        Loop.start()
-    }
-
-    const stop = () => {
-        Loop.stop()
-        Loop.reset()
-        current_time = timer_duration;
-    }
-
-    const pause = () => {
-        Loop.stop()
-    }
-
-    const resume = () => {
-        Loop.start()
-    }
-
-    const set = (time: number) => {
-        current_time = time
-    }
-
-    const update = (duration: number) => {
-        timer_duration = duration
-    }
-
-    return { start, stop, pause, resume, set, update }
+type TimerTypes = {
+    type: "constrained"
+    start_time: number
+    stop_time: number
+} | {
+    type: "unconstrained"
+    start_time: number
+    duration: number
+    direction: "up" | "down"
 }
 
-export const interval = (
-    duration: number,
-    significant_figure: number,
-    onUpdate?: (remaining_time: number) => void,
-    onReset?: () => void
+export const timer = <T extends TimerTypes>(
+    args: {
+        timer: T
+        interval?: number
+        onUpdate?: (remaining_time: number) => void,
+        onEnd?: () => void,
+    }
 ) => {
-    const IntervalTimer = timer(duration, significant_figure, (remaining_time) => {
-        if(onReset !== undefined && remaining_time <= 0) {
-            onReset();
-            IntervalTimer.start()
-        }
+    let current_time = 0
+    let timer_data = args.timer
 
-        if(onUpdate !== undefined) onUpdate(remaining_time);
-    })
+
+    const getTickMethods = () => {
+        if (timer_data.type === "constrained") {
+            const direction_vector = timer_data.start_time < timer_data.stop_time ? 1 : -1
+            let last_recorded_timestamp: null | number = null
+
+            return tick({
+                throttle: args.interval,
+                onInit: (timestamp) => {
+                    current_time = timer_data.start_time
+                    last_recorded_timestamp = timestamp
+                },
+                onTick: (timestamp) => {
+                    const delta = timestamp - (last_recorded_timestamp ?? 0)
+                    current_time = current_time + (direction_vector * delta)
+                    last_recorded_timestamp = timestamp
+                    const rounded_time = Math.round(Math.max(current_time, 0) / (args.interval ?? 0)) * (args.interval ?? 0)
+                    console.log(current_time)
+                    if (args.onUpdate) args.onUpdate(rounded_time);
+                },
+                endCondition: () => {
+                    if (timer_data.type === "unconstrained") return true; //? This is here because Typescript freaked out
+
+                    return timer_data.start_time < timer_data.stop_time ?
+                        current_time >= timer_data.stop_time :
+                        current_time <= timer_data.stop_time
+                },
+                onEnd: () => {
+                    if (timer_data.type === "unconstrained") return; //? This is here because Typescript freaked out
+
+                    if (args.onUpdate) args.onUpdate(timer_data.stop_time);
+                    if (args.onEnd) args.onEnd();
+                }
+            })
+        } else {
+            const direction_vector = timer_data.direction === "up" ? 1 : -1
+            let last_recorded_timestamp: null | number = null
+
+            return tick({
+                throttle: args.interval,
+                onInit: (timestamp) => {
+                    current_time = timer_data.start_time
+                    last_recorded_timestamp = timestamp
+                },
+                onTick: (timestamp) => {
+                    const delta = timestamp - (last_recorded_timestamp ?? 0)
+                    current_time = current_time + (direction_vector * delta)
+                    last_recorded_timestamp = timestamp
+                    const rounded_time = Math.round(Math.max(current_time, 0) / (args.interval ?? 0)) * (args.interval ?? 0)
+                    if (args.onUpdate) args.onUpdate(rounded_time);
+                },
+                endCondition: () => {
+                    if (timer_data.type === "constrained") return true; //? This is here because Typescript freaked out
+
+                    return timer_data.direction === "up" ?
+                        current_time >= timer_data.start_time + timer_data.duration :
+                        current_time <= (timer_data.start_time - timer_data.duration || 0)
+                },
+                onEnd: () => {
+                    if (timer_data.type === "constrained") return; //? This is here because Typescript freaked out
+
+                    const stop_time = timer_data.direction === "up" ?
+                        timer_data.start_time + timer_data.duration :
+                        timer_data.start_time - timer_data.duration > 0 ?
+                            timer_data.start_time - timer_data.duration :
+                            0
+
+                    if (args.onUpdate) args.onUpdate(stop_time);
+                    if (args.onEnd) args.onEnd();
+                }
+            })
+        }
+    }
+
+    const Loop = getTickMethods()
 
     const start = () => {
-        IntervalTimer.start();
+        Loop.reset()
+        Loop.start()
     }
 
     const stop = () => {
-        IntervalTimer.stop();
+        Loop.stop()
+        Loop.reset()
     }
 
-    const pause = () => {
-        IntervalTimer.pause();
-    }
+    const pause = () => Loop.stop()
 
-    const resume = () => {
-        IntervalTimer.resume();
-    }
+    const resume = () => Loop.start()
+    
 
-    const set = (time: number) => {
-        IntervalTimer.set(time);
-    }
+    const set = (time: number) => { current_time = time }
 
-    const update = (time: number) => {
-        IntervalTimer.update(time);
-    }
+    const update = (timer: T) => { timer_data = timer }
 
     return { start, stop, pause, resume, set, update }
 }
 
 // Interpolations
 
-type InterpolateArgsBase = {
-  range: [number, number],
-  significant_figure: number,
-  ease?: (progress: number) => number,
-  onUpdate?: (step: number) => void,
-  onFinish?: () => void,
-  duration?: number,
-}
-
-type InterpolateArgsThrottled = InterpolateArgsBase & {
-  throttle: true,
-  throttle_ms: number
-}
-
-type InterpolateArgsUnthrottled = InterpolateArgsBase & {
-  throttle?: false,
-  throttle_ms?: undefined
-}
-
-type InterpolateFunction = (args: InterpolateArgsThrottled | InterpolateArgsUnthrottled) => {
-  start: () => void,
-  stop: () => void,
-  reset: () => void,
-  seek: (position: number) => void,
+type InterpolateFunction = (args: {
+    range: [number, number],
+    significant_figure: number,
+    ease?: (progress: number) => number,
+    onUpdate?: (step: number) => void,
+    onFinish?: () => void,
+    duration?: number,
+    throttle?: number
+}) => {
+    start: () => void,
+    stop: () => void,
+    reset: () => void,
+    seek: (position: number) => void,
 }
 
 export const interpolate: InterpolateFunction = ({
@@ -193,21 +206,19 @@ export const interpolate: InterpolateFunction = ({
     onUpdate,
     onFinish,
     duration = 1000,
-    throttle = false,
-    throttle_ms = 100
+    throttle,
 }) => {
     const [startVal, endVal] = range
     let start_time = 0
-    let last_output_time: number | null = null
     let isStopped = false
     const distance = Math.abs(endVal - startVal)
     const step_direction = startVal < endVal ? 1 : -1
     let internalTimestamp = 0
 
     const Loop = tick({
+        throttle: throttle,
         onInit: (timestamp) => {
             start_time = timestamp
-            last_output_time = timestamp
             internalTimestamp = 0
             isStopped = false
         },
@@ -220,10 +231,7 @@ export const interpolate: InterpolateFunction = ({
             const interpolated = step_direction > 0 ? raw_value : startVal - (raw_value - startVal)
             const rounded_value = Math.round(interpolated / significant_figure) * significant_figure
 
-            if (!throttle || (last_output_time === null || timestamp - last_output_time >= throttle_ms)) {
-                last_output_time = timestamp
-                if (onUpdate) onUpdate(rounded_value)
-            }
+            if (onUpdate) onUpdate(rounded_value)
 
             if (progress >= 1) {
                 if (onUpdate) onUpdate(endVal)
@@ -337,7 +345,7 @@ export const series: SeriesFunction = () => {
                     setTimeout(resolve, duration)
                 }),
                 seek: (position: number) => {
-                    setTimeout(() => {}, duration - position)
+                    setTimeout(() => { }, duration - position)
                 }
             })
             return api

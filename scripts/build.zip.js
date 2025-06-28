@@ -1,23 +1,23 @@
-import fs from "fs";
-import archiver from "archiver";
+import fs from "fs"
+import archiver from "archiver"
 
-const zipName = "build.zip";
+const zipName = "build.zip"
 const outputDir = "release/dist"
 
 try{
   fs.mkdirSync("release")
 } catch(e) {}
-const output = fs.createWriteStream("release/" + zipName);
-const archive = archiver("zip", { zlib: { level: 9 } });
+const output = fs.createWriteStream("release/" + zipName)
+const archive = archiver("zip", { zlib: { level: 9 } })
 
 output.on("close", () => {
-  console.log(`✅ Created ${zipName} (${archive.pointer()} total bytes)`);
-});
+  console.log(`✅ Created ${zipName} (${archive.pointer()} total bytes)`)
+})
 
 archive.on("error", err => {
-  throw err;
-});
+  throw err
+})
 
-archive.pipe(output);
-archive.directory(outputDir, false);
-archive.finalize();
+archive.pipe(output)
+archive.directory(outputDir, false)
+archive.finalize()

@@ -99,7 +99,7 @@ export const HueChangeStatic = memo(() => {
 })
 
 export const ResizeAnimated = () => {
-    const Element_Ref = useRef(null)
+    const Element_Ref = useRef(document.createElement("div"))
 
     return (
         <>
