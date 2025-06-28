@@ -19,6 +19,7 @@ import {
     ChartTooltipContent,
 } from "@/components/UI/chart"
 import { tick } from "@/engine/animation.timing"
+import { BackToDemoMenu } from "@/components/Game/BackToDemo";
 
 const click = soundEffect(shield_stop, { volume: 0.1 });
 
@@ -264,9 +265,11 @@ const LinearEffectExample = () => {
     );
 }
 
+
 export const Panel = () => {
     return <>
         <LinearEffectExample />
+        <BackToDemoMenu />
     </>
 };
 

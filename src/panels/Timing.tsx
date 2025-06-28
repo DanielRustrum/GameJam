@@ -2,6 +2,7 @@ import { Button } from "@ui/button"
 import { useInterpolation, useTimer } from "@/engine/animation.timing.react"
 import { CSSProperties, useState } from "react"
 import { Component } from "@/engine/types/component"
+import { BackToDemoMenu } from "@/components/Game/BackToDemo"
 
 const Demo: Component<{ name: string }> = ({ name, children, className }) => {
     const [display_demo, setDisplayDemo] = useState(false)
@@ -94,6 +95,8 @@ export const Panel = () => {
             <TimerDemo />
             <InterpolationDemo />
             <SeriesDemo />
+                    <BackToDemoMenu />
+            
         </div>
     )
 }

@@ -4,13 +4,14 @@ import { Slider } from "@ui/slider"
 import test_sheet from '@assets/sprites/Pink_Monster_Idle_4.png'
 import { memo, useRef, useState } from "react"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@ui/resizable"
+import { BackToDemoMenu } from "@/components/Game/BackToDemo"
 
-const [Sprite, {shader}] = spritesheet(test_sheet, {
-    tile_size: [32,32],
+const [Sprite, { shader }] = spritesheet(test_sheet, {
+    tile_size: [32, 32],
     frame_time: .25,
     structure: {
-        "main": {type: "animated", layer: 0, length: 4},
-        "tile": {type: "tile", layer: 0, length: 4},
+        "main": { type: "animated", layer: 0, length: 4 },
+        "tile": { type: "tile", layer: 0, length: 4 },
     }
 })
 
@@ -18,7 +19,7 @@ const [Sprite, {shader}] = spritesheet(test_sheet, {
 
 export const RateAnimated = memo(() => {
     const [rate, setRate] = useState(1)
-    
+
     return <div className="flex gap-10">
         <p className="text-m font-bold">Change Animation Rate: </p>
         <Sprite state="main" rate={rate} />
@@ -29,7 +30,7 @@ export const RateAnimated = memo(() => {
             step={.1}
             className="w-50"
             onValueChange={value => {
-                if(value[0] !== rate) setRate(value[0]);
+                if (value[0] !== rate) setRate(value[0]);
             }}
         />
         <p>{rate}</p>
@@ -38,7 +39,7 @@ export const RateAnimated = memo(() => {
 
 export const ScaleAnimated = memo(() => {
     const [scale, setScale] = useState(1)
-    
+
     return <div className="flex gap-10 items-center">
         <p className="text-m font-bold">Change Scale: </p>
         <Sprite state="main" scale={scale} />
@@ -49,7 +50,7 @@ export const ScaleAnimated = memo(() => {
             step={.1}
             className="w-50"
             onValueChange={value => {
-                if(value[0] !== scale) setScale(value[0]);
+                if (value[0] !== scale) setScale(value[0]);
             }}
         />
         <p>{scale}</p>
@@ -58,10 +59,10 @@ export const ScaleAnimated = memo(() => {
 
 export const ScaleStatic = memo(() => {
     const [scale, setScale] = useState(1)
-    
+
     return <div className="flex gap-10 items-center">
         <p className="text-m font-bold">Change Scale: </p>
-        <Sprite state="tile" scale={scale}/>
+        <Sprite state="tile" scale={scale} />
         <Slider
             defaultValue={[1]}
             min={.5}
@@ -69,7 +70,7 @@ export const ScaleStatic = memo(() => {
             step={.1}
             className="w-50"
             onValueChange={value => {
-                if(value[0] !== scale) setScale(value[0]);
+                if (value[0] !== scale) setScale(value[0]);
             }}
         />
         <p>{scale}</p>
@@ -78,7 +79,7 @@ export const ScaleStatic = memo(() => {
 
 export const HueChangeStatic = memo(() => {
     const [hue, setHue] = useState(0)
-    
+
     return <div className="flex gap-10 items-center">
         <p className="text-m font-bold">Change Hue: </p>
         <Sprite state="tile" style={{ filter: `hue-rotate(${hue}deg)` }} />
@@ -89,7 +90,7 @@ export const HueChangeStatic = memo(() => {
             step={1}
             className="w-50"
             onValueChange={value => {
-                if(value[0] !== hue) setHue(value[0]);
+                if (value[0] !== hue) setHue(value[0]);
             }}
         />
         <p>{hue}</p>
@@ -109,10 +110,10 @@ export const ResizeAnimated = () => {
                 <ResizablePanel defaultSize={25}>
                     <p>Resize the container to resize the sprite.</p>
                 </ResizablePanel>
-                <ResizableHandle withHandle/>
+                <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={75} >
                     <div className="h-full" ref={Element_Ref}>
-                        <Sprite state="main" resizeTo={Element_Ref}/>
+                        <Sprite state="main" resizeTo={Element_Ref} />
                     </div>
                 </ResizablePanel>
             </ResizablePanelGroup>
@@ -124,19 +125,19 @@ setTimeout(() => {
     shader("test", (ctx, width, height) => {
         const imageData = ctx.getImageData(0, 0, width, height)
         const data = imageData.data
-    
+
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i]
             const g = data[i + 1]
             const b = data[i + 2]
-    
+
             if (r > 110 && b > 200 && g < 100) {
                 data[i] = 60
                 data[i + 1] = 80
                 data[i + 2] = 70
             }
         }
-    
+
         ctx.putImageData(imageData, 0, 0)
     })
 }, 2000)
@@ -166,20 +167,23 @@ export const AnimationExample = () => {
             }`}
         </style>
         <p className="text-m font-bold">Added CSS Animation: </p>
-        <Sprite state="main" animation="bounce 10s ease-in-out infinite" scale={3}/>
+        <Sprite state="main" animation="bounce 10s ease-in-out infinite" scale={3} />
     </div>
 }
 
-export const Panel = () => <><p className="text-xl font-bold text-center">Animation</p>
-        <Sprite state="main" />
-        <RateAnimated />
-        <ScaleAnimated />
-        <p className="text-xl font-bold text-center">Static</p>
-        <Sprite state="tile" tile={2} />
-        <ScaleStatic />
-        <HueChangeStatic />
-        <ResizeAnimated />
-        <ShaderExample />
-        <AnimationExample /></>
+export const Panel = () => <>
+    <p className="text-xl font-bold text-center">Animation</p>
+    <Sprite state="main" />
+    <RateAnimated />
+    <ScaleAnimated />
+    <p className="text-xl font-bold text-center">Static</p>
+    <Sprite state="tile" tile={2} />
+    <ScaleStatic />
+    <HueChangeStatic />
+    <ResizeAnimated />
+    <ShaderExample />
+    <AnimationExample />
+    <BackToDemoMenu />
+</>
 
 export const name = "sprite"
